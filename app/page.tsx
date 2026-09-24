@@ -16,8 +16,8 @@ const services = [
 
 
 const STATIC_HERO = [
-  { src: "/image.png", alt: "Turf Clean Pros — Melbourne's Largest Turf Cleaning Service" },
-  { src: "/hero.png",  alt: "Turf Clean Pros — Professional Turf Cleaning Melbourne" },
+  { src: "/hero.jpeg",  alt: "Turf Clean Pros — Professional Turf Cleaning Melbourne" },
+  { src: "/hero1.jpeg", alt: "Turf Clean Pros — Melbourne's Largest Turf Cleaning Service" },
 ];
 
 function heroSrc(url: string) {
@@ -204,7 +204,7 @@ export default function HomePage() {
 
           {/* Heading */}
           <h1 className="font-display font-black text-[1.65rem] md:text-5xl leading-[1.15] text-ink-900 mb-5">
-            Turf Cleaning, Window Cleaning and Bird Proofing{" "}
+            Professional Synthetic Turf Cleaning{" "}
             <span className="bg-gradient-to-r from-violet-600 to-accent-500 bg-clip-text text-transparent">
               Across Melbourne
             </span>

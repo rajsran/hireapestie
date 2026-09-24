@@ -42,7 +42,7 @@ function AcceptForm() {
         </p>
         <p className="mt-6 text-sm text-gray-400">
           Questions? Call us on{" "}
-          <a href="tel:0420104774" className="text-[#1b2d6e] font-semibold">0420 104 774</a>
+          <a href="tel:0420104774" className="text-[#1A6B3C] font-semibold">0420 104 774</a>
         </p>
       </div>
     );
@@ -60,7 +60,7 @@ function AcceptForm() {
           value={address}
           onChange={e => setAddress(e.target.value)}
           placeholder="e.g. 12 Smith Street, Melbourne VIC 3000"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1b2d6e] focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A6B3C] focus:border-transparent"
         />
         <p className="mt-1 text-xs text-gray-400">
           We need this to schedule your job and send our team.
@@ -89,7 +89,7 @@ export default function AcceptQuotePage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-md p-8">
         <div className="mb-6 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-[#1b2d6e] rounded-xl mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-[#1A6B3C] rounded-xl mb-4">
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
