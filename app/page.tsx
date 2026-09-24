@@ -3,13 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
-import { ArrowRight, Phone, Star, Home, Building2, Sun, Wrench, ShieldCheck, Award, Clock, MapPin, LayoutGrid, FileText } from "lucide-react";
+import { ArrowRight, Phone, Star, Sparkles, Heart, Leaf, Wind, CalendarCheck, Award, Clock, MapPin, LayoutGrid, FileText, Wrench, ShieldCheck } from "lucide-react";
 import QuoteChat from "@/components/QuoteChat";
 
 const services = [
-  { Icon: Home,        title: "Residential Turf Cleaning", desc: "Complete turf and downpipe cleaning for homes across all Melbourne suburbs." },
-  { Icon: Building2,   title: "Commercial Turf Cleaning",  desc: "Large-scale commercial turf maintenance — scheduled, reliable, and safe."     },
-  { Icon: ShieldCheck, title: "Bird Proofing Mesh",          desc: "Premium mesh installation to stop birds nesting in your turfs and roof."      },
+  { Icon: Sparkles,      title: "Synthetic Turf Deep Clean",   desc: "Professional deep clean to restore your synthetic turf — from $150 for up to 25m²." },
+  { Icon: Heart,         title: "Pet Odour & Stain Treatment", desc: "Enzyme-based treatment that eliminates pet smells and bacteria at the source."       },
+  { Icon: Leaf,          title: "Moss & Algae Removal",        desc: "Bio-safe treatment to remove slippery moss and algae growth from your turf."         },
+  { Icon: Wind,          title: "Debris & Leaf Clearing",      desc: "Quick surface clear to remove leaves, bark and debris and restore drainage flow."     },
+  { Icon: CalendarCheck, title: "Scheduled Maintenance Plans", desc: "Quarterly visits at 10–15% off standard rates — set and forget turf care."           },
 ];
 
 

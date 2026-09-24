@@ -3,56 +3,93 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Check, Home, Building2, ShieldCheck, FileText, ArrowRight } from "lucide-react";
+import { Phone, Check, Sparkles, Heart, Leaf, Wind, CalendarCheck, FileText, ArrowRight } from "lucide-react";
 
 const services = [
   {
-    id: "residential-turf-cleaning",
-    Icon: Home,
-    title: "Residential Turf Cleaning",
-    tagline: "Keep your home protected from water damage.",
-    desc: "Blocked turfs can cause serious damage to your roof, walls and foundations. Our residential turf cleaning service removes all leaves, debris and build-up — leaving your turfs and downpipes flowing freely.",
+    id: "synthetic-turf-deep-clean",
+    Icon: Sparkles,
+    title: "Synthetic Turf Deep Clean",
+    tagline: "Restore your turf to like-new condition.",
+    desc: "Our signature deep clean removes embedded dirt, dust, organic matter and bacteria from your synthetic turf using professional-grade equipment. We restore drainage flow, revive the fibres and leave your lawn looking and smelling fresh.",
     features: [
-      "Full turf & downpipe clear-out",
-      "Debris removal & disposal",
-      "Downpipe flush & flow test",
-      "Minor repairs flagged & quoted",
+      "Debris & dry waste removal",
+      "High-powered rotary brush clean",
+      "Infill top-up assessment",
+      "Drainage flow check",
       "Before & after photos provided",
-      "Single & double-storey homes",
+      "Residential & commercial turf",
     ],
+    pricing: "From $150 (up to ~25m²) · $6–8/m² for larger areas",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80",
   },
   {
-    id: "commercial-turf-cleaning",
-    Icon: Building2,
-    title: "Commercial Turf Cleaning",
-    tagline: "Reliable, scheduled maintenance for any building.",
-    desc: "We provide professional commercial turf cleaning for offices, warehouses, retail centres, schools and strata properties across Melbourne. Flexible scheduling, compliance documentation, and fully insured service.",
+    id: "pet-odour-stain-treatment",
+    Icon: Heart,
+    title: "Pet Odour & Stain Treatment",
+    tagline: "Eliminate pet smells and stains for good.",
+    desc: "Pet urine and waste can penetrate deep into synthetic turf fibres and infill, causing persistent odours and unhygienic conditions. Our enzyme-based treatment neutralises bacteria at the source — not just masking smells, but eliminating them.",
     features: [
-      "All commercial building types",
-      "Scheduled maintenance plans",
-      "Compliance & safety documentation",
-      "High-rise & flat-roof turfs",
-      "SWMS & insurance certificates",
-      "Strata & body corporate billing",
+      "Enzyme-based deodorising treatment",
+      "Bacteria & pathogen neutralisation",
+      "Pet-safe, non-toxic products",
+      "Suitable for all turf types",
+      "Available as add-on or standalone",
+      "Fast-drying formula",
     ],
+    pricing: "$60–100 as add-on · $120–160 standalone",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80",
+  },
+  {
+    id: "moss-algae-removal",
+    Icon: Leaf,
+    title: "Moss & Algae Removal",
+    tagline: "Safe, slippery-free turf all year round.",
+    desc: "Shaded or damp areas are prone to moss and algae growth on synthetic turf, which creates a slippery and unsightly surface. We apply targeted bio-treatments to kill and remove growth without damaging your turf backing or infill.",
+    features: [
+      "Bio-safe algae & moss treatment",
+      "Manual removal of growth",
+      "Turf backing protection",
+      "Safe for kids and pets after dry",
+      "Available as add-on or standalone",
+      "Prevents regrowth for longer",
+    ],
+    pricing: "$80–150 as add-on or standalone",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80",
+  },
+  {
+    id: "debris-leaf-clearing",
+    Icon: Wind,
+    title: "Debris & Leaf Clearing",
+    tagline: "Keep your turf clean between deep cleans.",
+    desc: "Leaves, bark, twigs and organic debris accumulate on synthetic turf and block drainage if left uncleared. Our debris clearing service uses blowers and rakes to quickly remove surface build-up and restore a neat, functional lawn.",
+    features: [
+      "Surface debris removal",
+      "Leaf & bark blowing/raking",
+      "Drainage grille clearing",
+      "Quick-turnaround service",
+      "Great as a regular maintenance visit",
+      "Residential & commercial",
+    ],
+    pricing: "$60–100",
     image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80",
   },
   {
-    id: "bird-proofing-mesh",
-    Icon: ShieldCheck,
-    title: "Bird Proofing Mesh",
-    tagline: "Stop birds nesting in your turfs and roof.",
-    desc: "Birds nesting in turfs and under solar panels cause blockages, damage and hygiene issues. We supply and install premium bird proofing mesh systems that permanently prevent birds from entering your turfs and roof spaces.",
+    id: "scheduled-maintenance-plans",
+    Icon: CalendarCheck,
+    title: "Scheduled Maintenance Plans",
+    tagline: "Set and forget — we keep your turf perfect.",
+    desc: "Our quarterly maintenance plans combine deep cleaning, treatment and inspection into one scheduled visit — at a discounted rate. Ideal for busy households, landlords, childcare centres and commercial properties that need consistent upkeep.",
     features: [
-      "Premium stainless steel mesh",
-      "Suits all turf & roof types",
-      "Solar panel bird proofing available",
-      "Prevents nesting & blockages",
-      "Long-lasting UV-resistant materials",
-      "Clean, professional installation",
+      "10–15% off standard service rates",
+      "Quarterly scheduled visits",
+      "Combined deep clean + treatments",
+      "Priority booking & fast response",
+      "Detailed condition reports",
+      "Suits residential & commercial",
     ],
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80",
+    pricing: "10–15% off standard rates · Quarterly plans",
+    image: "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=900&q=80",
   },
 ];
 
@@ -67,7 +104,7 @@ export default function ServicesClient() {
           <p className="text-violet-600 text-xs font-bold tracking-widest uppercase mb-3">What We Offer</p>
           <h1 className="font-display font-black text-4xl md:text-6xl text-ink-900 leading-tight mb-4">Our Services</h1>
           <p className="text-ink-500 text-base md:text-lg leading-relaxed max-w-xl mx-auto">
-            Three specialist services. One trusted team. Covering all Melbourne suburbs.
+            Five specialist services. One trusted team. Covering all Melbourne suburbs.
           </p>
         </div>
       </section>
@@ -151,7 +188,13 @@ export default function ServicesClient() {
                     </div>
                   </div>
 
-                  <p className="text-ink-500 text-sm md:text-base leading-relaxed mb-6">{s.desc}</p>
+                  <p className="text-ink-500 text-sm md:text-base leading-relaxed mb-4">{s.desc}</p>
+
+                  {/* Pricing badge */}
+                  <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-xl px-3 py-2 mb-5 self-start">
+                    <span className="text-[10px] font-bold text-violet-500 uppercase tracking-widest">Pricing</span>
+                    <span className="text-sm font-semibold text-violet-700">{s.pricing}</span>
+                  </div>
 
                   <p className="text-[10px] font-bold text-ink-300 uppercase tracking-widest mb-3">What&apos;s included</p>
                   <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 mb-7">

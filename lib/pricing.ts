@@ -1,34 +1,14 @@
-export const PRICING: Record<string, Record<string, { low: number; high: number; unit: "m²" | "lm" }>> = {
-  Concreting: {
-    "Plain Concrete":      { low: 60,  high: 70,  unit: "m²" },
-    "Coloured Concrete":   { low: 70,  high: 80,  unit: "m²" },
-    "Exposed Aggregate":   { low: 100, high: 110, unit: "m²" },
-  },
-  Landscaping: {
-    "Full Garden Design":   { low: 80,  high: 150, unit: "m²" },
-    "Turf / Instant Lawn":  { low: 30,  high: 60,  unit: "m²" },
-    "Artificial Grass":     { low: 70,  high: 120, unit: "m²" },
-    "Paving & Hardscaping": { low: 63,  high: 170, unit: "m²" },
-  },
-  Decking: {
-    "Hardwood (Merbau)":   { low: 280, high: 290, unit: "m²" },
-    "Composite Decking":   { low: 300, high: 320, unit: "m²" },
-  },
-  Fencing: {
-    "Colorbond Steel": { low: 100, high: 120, unit: "lm" },
-    "Timber Paling":   { low: 100, high: 120, unit: "lm" },
-  },
-};
-
 export interface QuoteLead {
   service?: string;
+  turfSize?: string;
+  serviceDetail?: string;  // "Add-on" | "Standalone"
+  postcode?: string;
+  suburb?: string;
+  // Legacy fields retained for compatibility
   levels?: string;
   panels?: string;
   roofType?: string;
   bedrooms?: string;
-  postcode?: string;
-  suburb?: string;
-  // Legacy fields used by old quote forms
   type?: string;
   size?: string;
   timeline?: string;
@@ -37,33 +17,59 @@ export interface QuoteLead {
   phone?: string;
 }
 
-const GUTTER_LEVELS_PRICING: Record<string, { low: number; high: number }> = {
-  "1 level":  { low: 149, high: 250 },
-  "2 levels": { low: 300, high: 450 },
+const TURF_SIZE_PRICING: Record<string, { low: number; high: number; note?: string }> = {
+  "Up to 25m²":   { low: 150, high: 150, note: "Up to ~25m²" },
+  "25–50m²":      { low: 300, high: 400, note: "25–50m²" },
+  "50–100m²":     { low: 500, high: 800, note: "50–100m²" },
 };
+
+const TREATMENT_PRICING: Record<string, Record<string, { low: number; high: number }>> = {
+  "Pet Odour & Stain Treatment": {
+    "Add-on":     { low: 60,  high: 100 },
+    "Standalone": { low: 120, high: 160 },
+  },
+  "Moss & Algae Removal": {
+    "Add-on":     { low: 80,  high: 120 },
+    "Standalone": { low: 100, high: 150 },
+  },
+};
+
+const DEBRIS_PRICING = { low: 60, high: 100 };
 
 export function isTurfService(service?: string): boolean {
   return (
-    service === "Residential Turf Cleaning" ||
-    service === "Commercial Turf Cleaning" ||
-    service === "Bird Proofing Mesh"
+    service === "Synthetic Turf Deep Clean" ||
+    service === "Pet Odour & Stain Treatment" ||
+    service === "Moss & Algae Removal" ||
+    service === "Debris & Leaf Clearing" ||
+    service === "Scheduled Maintenance Plans"
   );
 }
 
 export function calcTurfEstimate(lead: QuoteLead): { low: number; high: number; note?: string } | null {
   if (!lead.service) return null;
-  if (lead.service === "Commercial Turf Cleaning") return null;
-  if (lead.service === "Bird Proofing Mesh") {
-    const match = lead.panels?.match(/^(\d+)/);
-    if (match) {
-      const count = Number(match[1]);
-      return { low: count * 30, high: count * 40 };
-    }
-    return null;
+
+  if (lead.service === "Synthetic Turf Deep Clean") {
+    const size = lead.turfSize ?? lead.levels;
+    if (!size || size === "100m²+") return null;
+    return TURF_SIZE_PRICING[size] ?? null;
   }
-  if (!lead.levels) return null;
-  return GUTTER_LEVELS_PRICING[lead.levels] ?? null;
+
+  if (lead.service === "Pet Odour & Stain Treatment" || lead.service === "Moss & Algae Removal") {
+    const detail = lead.serviceDetail;
+    if (!detail) return null;
+    return TREATMENT_PRICING[lead.service]?.[detail] ?? null;
+  }
+
+  if (lead.service === "Debris & Leaf Clearing") {
+    return DEBRIS_PRICING;
+  }
+
+  return null;
 }
+
+// Legacy estimate used for old Concreting/Landscaping/etc. quote types
+export const PRICING: Record<string, Record<string, { low: number; high: number; unit: "m²" | "lm" }>> = {};
 
 export function calcEstimate(a: QuoteLead): { low: number; high: number } | null {
   if (!a.service || !a.type || !a.size) return null;

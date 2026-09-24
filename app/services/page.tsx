@@ -2,20 +2,21 @@ import type { Metadata } from "next";
 import ServicesClient from "./ServicesClient";
 
 export const metadata: Metadata = {
-  title: "Turf Cleaning Services Melbourne | Residential, Commercial & Bird Proofing",
+  title: "Synthetic Turf Cleaning Services Melbourne | Deep Clean, Pet Treatment & More",
   description:
-    "Professional turf cleaning services across all Melbourne suburbs. Residential from $149, commercial turf cleaning, and bird proofing mesh installation. Fully insured, 4.9★ rated.",
+    "Professional synthetic turf cleaning services across all Melbourne suburbs. Deep clean from $150, pet odour treatment, moss removal, debris clearing & maintenance plans. Fully insured, 4.9★ rated.",
   keywords: [
-    "turf cleaning Melbourne",
-    "residential turf cleaning Melbourne",
-    "commercial turf cleaning Melbourne",
-    "bird proofing mesh Melbourne",
-    "turf cleaning price Melbourne",
+    "synthetic turf cleaning Melbourne",
+    "turf deep clean Melbourne",
+    "pet odour turf treatment Melbourne",
+    "moss algae removal synthetic turf",
+    "turf maintenance plan Melbourne",
+    "artificial grass cleaning Melbourne",
   ],
   openGraph: {
-    title: "Turf Cleaning Services Melbourne | Residential, Commercial & Bird Proofing",
+    title: "Synthetic Turf Cleaning Services Melbourne | Deep Clean, Pet Treatment & More",
     description:
-      "Professional turf cleaning services across all Melbourne suburbs. Residential from $149, commercial turf cleaning, and bird proofing mesh installation.",
+      "Professional synthetic turf cleaning services across all Melbourne suburbs. Deep clean from $150, pet odour treatment, moss removal, debris clearing & maintenance plans.",
     url: "https://www.turfcleanpros.com.au/services",
   },
   alternates: { canonical: "https://www.turfcleanpros.com.au/services" },

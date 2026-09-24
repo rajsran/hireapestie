@@ -4,20 +4,18 @@ declare const fbq: ((...args: unknown[]) => void) | undefined;
 
 import { useState, useEffect, useRef } from "react";
 import {
-  X, Home, Building2, ShieldCheck,
+  X, Sparkles, Heart, Leaf, Wind, CalendarCheck,
   ChevronRight, ChevronLeft, Phone, CheckCircle2, Loader2,
-  MessageCircle, User, BedDouble,
+  MessageCircle, User, Maximize2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Step = "service" | "levels" | "panels" | "rooftype" | "bedrooms" | "contact" | "quote";
+type Step = "contact" | "service" | "turfsize" | "addontype" | "quote";
 
 interface Answers {
   service?: string;
-  levels?: string;
-  panels?: string;
-  roofType?: string;
-  bedrooms?: string;
+  turfSize?: string;
+  serviceDetail?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -32,45 +30,48 @@ export interface QuoteChatProps {
 
 // ─── Step Options ─────────────────────────────────────────────────────────────
 const SERVICE_OPTIONS = [
-  { label: "Residential Turf Cleaning", Icon: Home,        desc: "Home turf & downpipe clean" },
-  { label: "Commercial Turf Cleaning",  Icon: Building2,   desc: "Offices, warehouses & strata" },
-  { label: "Bird Proofing Mesh",          Icon: ShieldCheck, desc: "Stop birds nesting in turfs" },
+  { label: "Synthetic Turf Deep Clean",    Icon: Sparkles,      desc: "Deep clean from $150 · all turf types" },
+  { label: "Pet Odour & Stain Treatment",  Icon: Heart,         desc: "Enzyme treatment · $60–160" },
+  { label: "Moss & Algae Removal",         Icon: Leaf,          desc: "Bio-safe removal · $80–150" },
+  { label: "Debris & Leaf Clearing",       Icon: Wind,          desc: "Quick surface clear · $60–100" },
+  { label: "Scheduled Maintenance Plans",  Icon: CalendarCheck, desc: "10–15% off · quarterly visits" },
 ];
 
-const LEVELS_OPTIONS = [
-  { label: "1 level",  Icon: Home,      desc: "Single storey property" },
-  { label: "2 levels", Icon: Building2, desc: "Double storey property" },
+const TURF_SIZE_OPTIONS = [
+  { label: "Up to 25m²",  low: 150, high: 150, desc: "Small yard or balcony turf" },
+  { label: "25–50m²",     low: 300, high: 400, desc: "Medium backyard turf" },
+  { label: "50–100m²",    low: 500, high: 800, desc: "Large backyard or side area" },
+  { label: "100m²+",      low: 0,   high: 0,   desc: "Large commercial or estate — custom quote" },
 ];
 
-const PANELS_OPTIONS = [
-  { label: "15 panels", low: 450,  high: 600,  desc: "Covers approx. 15 turf panels" },
-  { label: "30 panels", low: 900, high: 1200, desc: "Covers approx. 30 turf panels" },
+const ADDON_OPTIONS = [
+  { label: "Add-on",    desc: "Adding to a Turf Deep Clean booking" },
+  { label: "Standalone", desc: "As a separate standalone service" },
 ];
 
-const ROOFTYPE_OPTIONS = [
-  { label: "Tile",              desc: "Terracotta or concrete tiles" },
-  { label: "Colorbond / Metal", desc: "Steel or metal sheeting" },
-  { label: "Wood Shingles",     desc: "Timber shingle roof" },
-  { label: "Asbestos",          desc: "Older fibro / asbestos sheeting" },
-  { label: "Other",             desc: "Not sure or mixed material" },
-];
-
-const BEDROOMS_OPTIONS = [
-  { label: "1–2 bedrooms", Icon: BedDouble, desc: "Small to medium home" },
-  { label: "3–4 bedrooms", Icon: BedDouble, desc: "Medium to large home" },
-  { label: "5+ bedrooms",  Icon: BedDouble, desc: "Large home or multi-dwelling" },
-];
-
-const MESH_STEPS:    Step[] = ["contact", "service", "panels", "quote"];
-const DEFAULT_STEPS: Step[] = ["contact", "service", "levels", "rooftype", "bedrooms", "quote"];
+function getNextStep(service: string): Step {
+  if (service === "Synthetic Turf Deep Clean") return "turfsize";
+  if (service === "Pet Odour & Stain Treatment") return "addontype";
+  if (service === "Moss & Algae Removal") return "addontype";
+  return "quote";
+}
 
 const PREV_STEP: Partial<Record<Step, Step>> = {
-  service:  "contact",
-  levels:   "service",
-  panels:   "service",
-  rooftype: "levels",
-  bedrooms: "rooftype",
+  service:   "contact",
+  turfsize:  "service",
+  addontype: "service",
 };
+
+// ─── Pricing helpers ──────────────────────────────────────────────────────────
+function getAddonPricing(service: string, detail: string): { low: number; high: number } {
+  if (service === "Pet Odour & Stain Treatment") {
+    return detail === "Add-on" ? { low: 60, high: 100 } : { low: 120, high: 160 };
+  }
+  if (service === "Moss & Algae Removal") {
+    return detail === "Add-on" ? { low: 80, high: 120 } : { low: 100, high: 150 };
+  }
+  return { low: 60, high: 100 };
+}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
@@ -83,10 +84,9 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   const [contactSuburb,   setContactSuburb]   = useState("");
   const [suburbs,         setSuburbs]         = useState<string[]>([]);
   const [suburbLoading,   setSuburbLoading]   = useState(false);
-  const [isLoading, setIsLoading]       = useState(false);
-  const [quoteEstimate, setQuoteEstimate] = useState<{ low: number; high: number; note?: string } | null>(null);
-  const [submittedRef]       = useState({ value: false });
-  const [manualPanels, setManualPanels] = useState("");
+  const [isLoading,       setIsLoading]       = useState(false);
+  const [quoteEstimate,   setQuoteEstimate]   = useState<{ low: number; high: number; note?: string } | null>(null);
+  const [submittedRef]                        = useState({ value: false });
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -102,10 +102,9 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
       setSuburbs([]);
       setIsLoading(false);
       setQuoteEstimate(null);
-      setManualPanels("");
       submittedRef.value = false;
     }
-  }, [isOpen]);
+  }, [isOpen, submittedRef]);
 
   // Fetch suburbs when postcode hits 4 digits
   useEffect(() => {
@@ -132,8 +131,8 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   const scrollTop = () =>
     setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 60);
 
-  const advance = (key: keyof Answers, value: string, nextStep: Step) => {
-    setAnswers((prev) => ({ ...prev, [key]: value }));
+  const advance = (update: Partial<Answers>, nextStep: Step) => {
+    setAnswers(prev => ({ ...prev, ...update }));
     setStep(nextStep);
     scrollTop();
   };
@@ -144,28 +143,21 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   };
 
   const submitContact = () => {
-    setAnswers((prev) => ({
-      ...prev,
+    const contactData = {
       name:     contactName.trim()     || "Not provided",
       phone:    contactPhone.trim()    || "Not provided",
-      email:    contactEmail.trim()    || "Not provided",
+      email:    contactEmail.trim()    || undefined,
       postcode: contactPostcode.trim() || undefined,
       suburb:   contactSuburb.trim()   || undefined,
-    }));
+    };
+    setAnswers(prev => ({ ...prev, ...contactData }));
     setStep("service");
     scrollTop();
 
-    // Notify admin immediately — fire and forget
     fetch("/api/quote/early-lead", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name:     contactName.trim()     || "Not provided",
-        phone:    contactPhone.trim()    || "Not provided",
-        email:    contactEmail.trim()    || undefined,
-        postcode: contactPostcode.trim() || undefined,
-        suburb:   contactSuburb.trim()   || undefined,
-      }),
+      body: JSON.stringify(contactData),
     }).catch(() => {});
   };
 
@@ -189,8 +181,9 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
     }
   };
 
-  const STEP_ORDER = answers.service === "Bird Proofing Mesh" ? MESH_STEPS : DEFAULT_STEPS;
-  const progress   = Math.round((STEP_ORDER.indexOf(step) / (STEP_ORDER.length - 1)) * 100);
+  const STEP_ORDER: Step[] = ["contact", "service", "turfsize", "quote"];
+  const currentIndex = STEP_ORDER.indexOf(step);
+  const progress = Math.round((currentIndex / (STEP_ORDER.length - 1)) * 100);
   const firstName = contactName.split(" ")[0] || answers.name?.split(" ")[0] || "";
 
   if (!isOpen) return null;
@@ -200,17 +193,14 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
       {/* Backdrop */}
       <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal panel — full screen on mobile, centered card on desktop */}
+      {/* Modal panel */}
       <div className="fixed inset-0 z-50 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[420px]">
-        <div
-          className="bg-white h-full md:rounded-3xl md:h-[680px] shadow-2xl flex flex-col overflow-hidden"
-        >
+        <div className="bg-white h-full md:rounded-3xl md:h-[680px] shadow-2xl flex flex-col overflow-hidden">
 
           {/* ── Header ── */}
           <div className="bg-ink-900 px-5 pt-4 pb-3 shrink-0">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                {/* Back button — shown on all steps except first and last */}
                 {step !== "service" && step !== "quote" && (
                   <button
                     onClick={goBack}
@@ -224,7 +214,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                   <MessageCircle className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-white font-bold text-sm leading-tight">Get Quotes in Minutes</p>
+                  <p className="text-white font-bold text-sm leading-tight">Get a Quote in Minutes</p>
                   <p className="text-white/50 text-[11px]">Turf Clean Pros · All Melbourne</p>
                 </div>
               </div>
@@ -233,7 +223,6 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
               </button>
             </div>
 
-            {/* Progress bar */}
             {step !== "quote" && (
               <div className="w-full bg-white/10 rounded-full h-1.5">
                 <div
@@ -247,167 +236,32 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
           {/* ── Scrollable body ── */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 space-y-2.5">
 
-            {/* ══ SERVICE ══ */}
-            {step === "service" && (
-              <StepShell
-                q="What service do you need?"
-                sub="Tap an option — we'll give you a price in seconds ⚡"
-              >
-                {SERVICE_OPTIONS.map(({ label, Icon, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={desc}
-                    icon={<Icon className="w-5 h-5 text-violet-600" />}
-                    onClick={() => advance("service", label, label === "Bird Proofing Mesh" ? "panels" : "levels")}
-                  />
-                ))}
-              </StepShell>
-            )}
-
-            {/* ══ LEVELS ══ */}
-            {step === "levels" && (
-              <StepShell
-                q="How many levels is your property?"
-                sub="This helps us estimate access and time required"
-              >
-                {LEVELS_OPTIONS.map(({ label, Icon, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={desc}
-                    icon={<Icon className="w-5 h-5 text-violet-600" />}
-                    onClick={() => advance("levels", label, "rooftype")}
-                  />
-                ))}
-              </StepShell>
-            )}
-
-            {/* ══ PANELS ══ */}
-            {step === "panels" && (
-              <StepShell
-                q="How many panels do you need?"
-                sub="Select your panel count — we'll give you an exact price"
-              >
-                {PANELS_OPTIONS.map(({ label, low, high, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={`$${low.toLocaleString()} – $${high.toLocaleString()} · ${desc}`}
-                    onClick={() => {
-                      const final = { ...answers, panels: label };
-                      setAnswers(final);
-                      finishQuote(final);
-                    }}
-                  />
-                ))}
-                {/* Manual panel count entry */}
-                <div className="mt-2 rounded-2xl border border-gray-200 p-4 flex flex-col gap-3">
-                  <p className="text-sm font-medium text-gray-700">Enter your own panel count</p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="e.g. 20"
-                      value={manualPanels}
-                      onChange={e => setManualPanels(e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-500 whitespace-nowrap">panels</span>
-                  </div>
-                  {manualPanels && Number(manualPanels) > 0 && (
-                    <p className="text-xs text-gray-500">
-                      Estimated price:{" "}
-                      <span className="font-semibold text-gray-800">
-                        ${(Number(manualPanels) * 30).toLocaleString()} – ${(Number(manualPanels) * 40).toLocaleString()}
-                      </span>
-                      <span className="ml-1">($30–$40 per panel)</span>
-                    </p>
-                  )}
-                  <button
-                    disabled={!manualPanels || Number(manualPanels) <= 0}
-                    onClick={() => {
-                      const count = Math.round(Number(manualPanels));
-                      const label = `${count} panel${count === 1 ? "" : "s"} (custom)`;
-                      const final = { ...answers, panels: label };
-                      setAnswers(final);
-                      finishQuote(final);
-                    }}
-                    className="w-full rounded-xl bg-blue-600 py-2 text-sm font-semibold text-white disabled:opacity-40 hover:bg-blue-700 transition-colors"
-                  >
-                    {manualPanels && Number(manualPanels) > 0
-                      ? `Confirm — $${(Number(manualPanels) * 30).toLocaleString()}–$${(Number(manualPanels) * 40).toLocaleString()}`
-                      : "Confirm"}
-                  </button>
-                </div>
-              </StepShell>
-            )}
-
-            {/* ══ ROOF TYPE ══ */}
-            {step === "rooftype" && (
-              <StepShell
-                q="What is your roof type?"
-                sub="Different materials need different cleaning methods"
-              >
-                {ROOFTYPE_OPTIONS.map(({ label, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={desc}
-                    onClick={() => advance("roofType", label, "bedrooms")}
-                  />
-                ))}
-              </StepShell>
-            )}
-
-            {/* ══ BEDROOMS ══ */}
-            {step === "bedrooms" && (
-              <StepShell
-                q="How many bedrooms does your home have?"
-                sub="Gives us a rough guide to your property size"
-              >
-                {BEDROOMS_OPTIONS.map(({ label, Icon, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={desc}
-                    icon={<Icon className="w-5 h-5 text-violet-600" />}
-                    onClick={() => {
-                      const final = { ...answers, bedrooms: label };
-                      setAnswers(final);
-                      finishQuote(final);
-                    }}
-                  />
-                ))}
-              </StepShell>
-            )}
-
             {/* ══ CONTACT ══ */}
             {step === "contact" && (
               <StepShell
-                q="Almost there! Your contact details"
-                sub="So we know who to follow up with"
+                q="Let's get started!"
+                sub="Enter your details and we'll give you a price in seconds"
                 icon={<User className="w-4 h-4 text-violet-600" />}
               >
                 <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
+                    onChange={e => setContactName(e.target.value)}
                     placeholder="Full name"
                     className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                   />
                   <input
                     type="tel"
                     value={contactPhone}
-                    onChange={(e) => setContactPhone(e.target.value)}
+                    onChange={e => setContactPhone(e.target.value)}
                     placeholder="Phone number (e.g. 0412 345 678)"
                     className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                   />
                   <input
                     type="email"
                     value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
+                    onChange={e => setContactEmail(e.target.value)}
                     placeholder="Email address"
                     className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
                   />
@@ -416,7 +270,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                       type="text"
                       inputMode="numeric"
                       value={contactPostcode}
-                      onChange={(e) => {
+                      onChange={e => {
                         setContactSuburb("");
                         setContactPostcode(e.target.value.replace(/\D/g, "").slice(0, 4));
                       }}
@@ -449,9 +303,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                     </div>
                   )}
                   {suburbs.length === 1 && (
-                    <p className="text-xs text-violet-600 font-semibold px-1">
-                      📍 {suburbs[0]}
-                    </p>
+                    <p className="text-xs text-violet-600 font-semibold px-1">📍 {suburbs[0]}</p>
                   )}
                   <button
                     onClick={submitContact}
@@ -464,12 +316,85 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
               </StepShell>
             )}
 
+            {/* ══ SERVICE ══ */}
+            {step === "service" && (
+              <StepShell
+                q="What service do you need?"
+                sub="Tap an option — we'll price it up instantly ⚡"
+              >
+                {SERVICE_OPTIONS.map(({ label, Icon, desc }) => (
+                  <OptionBtn
+                    key={label}
+                    label={label}
+                    desc={desc}
+                    icon={<Icon className="w-5 h-5 text-violet-600" />}
+                    onClick={() => {
+                      const next = getNextStep(label);
+                      if (next === "quote") {
+                        const final = { ...answers, service: label };
+                        setAnswers(final);
+                        finishQuote(final);
+                      } else {
+                        advance({ service: label }, next);
+                      }
+                    }}
+                  />
+                ))}
+              </StepShell>
+            )}
+
+            {/* ══ TURF SIZE ══ */}
+            {step === "turfsize" && (
+              <StepShell
+                q="What's the approximate size of your turf?"
+                sub="Pick the closest range — we'll confirm the exact m² on-site"
+                icon={<Maximize2 className="w-4 h-4 text-violet-600" />}
+              >
+                {TURF_SIZE_OPTIONS.map(({ label, low, high, desc }) => (
+                  <OptionBtn
+                    key={label}
+                    label={label}
+                    desc={
+                      label === "100m²+"
+                        ? desc
+                        : `$${low === high ? low : `${low}–${high}`} · ${desc}`
+                    }
+                    onClick={() => {
+                      const final = { ...answers, turfSize: label };
+                      setAnswers(final);
+                      finishQuote(final);
+                    }}
+                  />
+                ))}
+              </StepShell>
+            )}
+
+            {/* ══ ADD-ON TYPE ══ */}
+            {step === "addontype" && (
+              <StepShell
+                q="Will this be an add-on or standalone?"
+                sub="Add-ons are discounted when booked with a deep clean"
+              >
+                {ADDON_OPTIONS.map(({ label, desc }) => (
+                  <OptionBtn
+                    key={label}
+                    label={label}
+                    desc={desc}
+                    onClick={() => {
+                      const final = { ...answers, serviceDetail: label };
+                      setAnswers(final);
+                      finishQuote(final);
+                    }}
+                  />
+                ))}
+              </StepShell>
+            )}
+
             {/* ══ QUOTE RESULT ══ */}
             {step === "quote" && (
               <div className="flex flex-col gap-3 pb-2">
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-10 px-4 gap-6">
-                    {/* Animated rings */}
                     <div className="relative flex items-center justify-center">
                       <span className="absolute w-24 h-24 rounded-full bg-violet-100 animate-ping opacity-40" />
                       <span className="absolute w-16 h-16 rounded-full bg-violet-200 animate-ping opacity-50" style={{ animationDelay: "0.15s" }} />
@@ -477,14 +402,10 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                         <Loader2 className="w-7 h-7 text-white animate-spin" />
                       </div>
                     </div>
-
-                    {/* Text */}
                     <div className="text-center">
                       <p className="font-bold text-ink-900 text-lg mb-1">Preparing your quote…</p>
                       <p className="text-ink-400 text-sm">This only takes a moment</p>
                     </div>
-
-                    {/* Animated steps */}
                     <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
                       {[
                         { label: "Reviewing your property details", delay: "0s" },
@@ -492,10 +413,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                         { label: "Preparing your personalised quote", delay: "0.8s" },
                       ].map(({ label, delay }) => (
                         <div key={label} className="flex items-center gap-3">
-                          <div
-                            className="w-4 h-4 rounded-full bg-violet-500 animate-pulse shrink-0"
-                            style={{ animationDelay: delay }}
-                          />
+                          <div className="w-4 h-4 rounded-full bg-violet-500 animate-pulse shrink-0" style={{ animationDelay: delay }} />
                           <p className="text-ink-500 text-sm">{label}</p>
                         </div>
                       ))}
@@ -513,21 +431,62 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
 
                     {/* Price estimate */}
                     {(() => {
-                      const panelMatch = answers.panels?.match(/^(\d+)/);
-                      const panelCount = panelMatch ? Number(panelMatch[1]) : null;
-                      if (panelCount) {
-                        const low = panelCount * 30;
-                        const high = panelCount * 40;
+                      const service = answers.service ?? "";
+
+                      if (service === "Scheduled Maintenance Plans") {
                         return (
-                          <div className="bg-ink-900 rounded-2xl p-5 text-center">
-                            <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
-                            <p className="text-white font-black text-3xl">${low.toLocaleString()} – ${high.toLocaleString()}</p>
-                            <p className="text-white/40 text-xs mt-1">
-                              {panelCount} panel{panelCount === 1 ? "" : "s"} · $30–$40 per panel
-                            </p>
+                          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
+                            <p className="text-violet-700 font-bold text-sm mb-1">Pricing discussed over the phone</p>
+                            <p className="text-violet-500 text-xs leading-relaxed">Maintenance plans are tailored to your turf — our team will call you to discuss frequency, inclusions and your discounted rate (10–15% off).</p>
                           </div>
                         );
                       }
+
+                      if (service === "Synthetic Turf Deep Clean" && answers.turfSize === "100m²+") {
+                        return (
+                          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
+                            <p className="text-violet-700 font-bold text-sm mb-1">Custom quote for large areas</p>
+                            <p className="text-violet-500 text-xs leading-relaxed">For turf over 100m² we&apos;ll measure and provide a fixed price — our team will be in touch shortly.</p>
+                          </div>
+                        );
+                      }
+
+                      if (service === "Synthetic Turf Deep Clean" && answers.turfSize) {
+                        const opt = TURF_SIZE_OPTIONS.find(o => o.label === answers.turfSize);
+                        if (opt && opt.low > 0) {
+                          return (
+                            <div className="bg-ink-900 rounded-2xl p-5 text-center">
+                              <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
+                              <p className="text-white font-black text-3xl">
+                                {opt.low === opt.high ? `$${opt.low}` : `$${opt.low} – $${opt.high}`}
+                              </p>
+                              <p className="text-white/40 text-xs mt-1">{answers.turfSize} · Final confirmed on-site</p>
+                            </div>
+                          );
+                        }
+                      }
+
+                      if ((service === "Pet Odour & Stain Treatment" || service === "Moss & Algae Removal") && answers.serviceDetail) {
+                        const { low, high } = getAddonPricing(service, answers.serviceDetail);
+                        return (
+                          <div className="bg-ink-900 rounded-2xl p-5 text-center">
+                            <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
+                            <p className="text-white font-black text-3xl">${low} – ${high}</p>
+                            <p className="text-white/40 text-xs mt-1">{answers.serviceDetail} · Final confirmed on-site</p>
+                          </div>
+                        );
+                      }
+
+                      if (service === "Debris & Leaf Clearing") {
+                        return (
+                          <div className="bg-ink-900 rounded-2xl p-5 text-center">
+                            <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
+                            <p className="text-white font-black text-3xl">$60 – $100</p>
+                            <p className="text-white/40 text-xs mt-1">Final price confirmed on-site</p>
+                          </div>
+                        );
+                      }
+
                       if (quoteEstimate) {
                         return (
                           <div className="bg-ink-900 rounded-2xl p-5 text-center">
@@ -542,27 +501,18 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                           </div>
                         );
                       }
-                      if (answers.service === "Commercial Turf Cleaning") {
-                        return (
-                          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
-                            <p className="text-violet-700 font-bold text-sm mb-1">Pricing discussed over the phone</p>
-                            <p className="text-violet-500 text-xs leading-relaxed">Commercial jobs vary in size — our team will call you shortly to discuss pricing and arrange a free on-site quote.</p>
-                          </div>
-                        );
-                      }
+
                       return null;
                     })()}
 
-                    {/* Summary card */}
+                    {/* Summary */}
                     <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
                       <p className="text-ink-400 text-[11px] uppercase tracking-widest font-semibold mb-1">Your selections</p>
                       {[
-                        { label: "Service",   value: answers.service },
-                        { label: "Panels",    value: answers.panels },
-                        { label: "Levels",    value: answers.levels },
-                        { label: "Roof type", value: answers.roofType },
-                        { label: "Bedrooms",  value: answers.bedrooms },
-                        { label: "Postcode",  value: answers.postcode ? `${answers.postcode}${answers.suburb ? ` · ${answers.suburb}` : ""}` : undefined },
+                        { label: "Service",     value: answers.service },
+                        { label: "Turf size",   value: answers.turfSize },
+                        { label: "Type",        value: answers.serviceDetail },
+                        { label: "Postcode",    value: answers.postcode ? `${answers.postcode}${answers.suburb ? ` · ${answers.suburb}` : ""}` : undefined },
                       ].map(({ label, value }) => value && (
                         <div key={label} className="flex items-center justify-between text-sm">
                           <span className="text-ink-400">{label}</span>
