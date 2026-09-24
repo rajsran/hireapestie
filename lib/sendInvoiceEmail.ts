@@ -64,12 +64,12 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
       ${invoice.notes ? `<p style="color:#6b7280;font-size:13px;margin:0 0 16px;">${invoice.notes}</p>` : ""}
 
       <p style="color:#374151;line-height:1.6;margin:0;">
-        Questions? Call us on <strong>0474 226 785</strong> or reply to this email.
+        Questions? Call us on <strong>0433 240 617</strong> or reply to this email.
       </p>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
       <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · ABN 44 686 088 264 · Tarneit VIC 3029</p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0474 226 785</p>
+      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617</p>
     </div>
   </div>`;
 

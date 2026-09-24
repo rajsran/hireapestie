@@ -344,7 +344,7 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Phone"),
-              React.createElement(Text, { style: styles.infoValue }, "0474 226 785"),
+              React.createElement(Text, { style: styles.infoValue }, "0433 240 617"),
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Area"),
@@ -433,7 +433,7 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
             `Turf Clean Pros · ABN ${COMPANY_ABN}\nTarneit VIC 3029 · All Melbourne Suburbs`
           ),
           React.createElement(Text, { style: styles.footerRight },
-            "0474 226 785\nadmin@turfcleanpros.com.au"
+            "0433 240 617\nadmin@turfcleanpros.com.au"
           ),
         ),
       )

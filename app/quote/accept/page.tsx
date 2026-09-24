@@ -42,7 +42,7 @@ function AcceptForm() {
         </p>
         <p className="mt-6 text-sm text-gray-400">
           Questions? Call us on{" "}
-          <a href="tel:0420104774" className="text-[#1A6B3C] font-semibold">0420 104 774</a>
+          <a href="tel:0433240617" className="text-[#1A6B3C] font-semibold">0433 240 617</a>
         </p>
       </div>
     );
@@ -69,7 +69,7 @@ function AcceptForm() {
 
       {status === "error" && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">
-          Something went wrong. Please call us on 0420 104 774.
+          Something went wrong. Please call us on 0433 240 617.
         </p>
       )}
 

@@ -99,15 +99,15 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
 
       ${leadId ? "" : `
       <div style="text-align:center;margin:24px 0;">
-        <a href="tel:0420104774" style="display:inline-block;background:#1b2d6e;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:bold;font-size:14px;width:220px;">
-          Call 0420 104 774
+        <a href="tel:0433240617" style="display:inline-block;background:#1b2d6e;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:bold;font-size:14px;width:220px;">
+          Call 0433 240 617
         </a>
       </div>`}
     </div>
 
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
       <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · Tarneit VIC 3029 · All Melbourne Suburbs</p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0420 104 774 · 03 9121 8020</p>
+      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617 · 0433 240 617</p>
     </div>
   </div>`;
 }
@@ -208,7 +208,7 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
       <tr>
         <td align="center" bgcolor="#1b2d6e" style="border-radius:8px;padding:0;">
-          <a href="tel:0420104774" style="display:block;padding:16px 24px;color:#ffffff;font-weight:bold;font-size:16px;text-decoration:none;font-family:Arial,sans-serif;text-align:center;">Call 0420 104 774</a>
+          <a href="tel:0433240617" style="display:block;padding:16px 24px;color:#ffffff;font-weight:bold;font-size:16px;text-decoration:none;font-family:Arial,sans-serif;text-align:center;">Call 0433 240 617</a>
         </td>
       </tr>
     </table>`;
@@ -233,7 +233,7 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
     </div>
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
       <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · Tarneit VIC 3029 · All Melbourne Suburbs</p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0420 104 774 · 03 9121 8020</p>
+      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617 · 0433 240 617</p>
     </div>
   </div>`;
 

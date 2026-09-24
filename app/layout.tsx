@@ -6,7 +6,7 @@ const SITE_URL = "https://www.turfcleanpros.com.au";
 const SITE_NAME = "Turf Clean Pros";
 const DEFAULT_TITLE = "Turf Clean Pros | Melbourne's #1 Turf Cleaning Service";
 const DEFAULT_DESC =
-  "Professional turf cleaning, bird proofing mesh & commercial turf maintenance across all Melbourne suburbs. 4.9★ rated on Google. From $149. Call 0474 226 785.";
+  "Professional synthetic turf cleaning across all Melbourne suburbs. 4.9★ rated on Google. From $150. Call 0433 240 617.";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -25,10 +25,10 @@ export const metadata: Metadata = {
     "turf cleaner Melbourne",
     "residential turf cleaning",
     "commercial turf cleaning",
-    "bird proofing mesh Melbourne",
-    "turf cleaning near me",
-    "blocked turfs Melbourne",
-    "downpipe cleaning Melbourne",
+    "synthetic turf cleaning near me",
+    "artificial grass cleaning Melbourne",
+    "turf deep clean Melbourne",
+    "pet odour turf treatment Melbourne",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
@@ -109,15 +109,15 @@ export default function RootLayout({
                   logo: `${SITE_URL}/logo.png`,
                   image: `${SITE_URL}/og-image.jpg`,
                   description:
-                    "Melbourne's largest turf cleaning service. Professional residential and commercial turf cleaning, bird proofing mesh installation across all Melbourne suburbs.",
-                  telephone: "+61474226785",
+                    "Melbourne's largest synthetic turf cleaning service. Professional residential and commercial turf cleaning across all Melbourne suburbs.",
+                  telephone: "+61433240617",
                   email: "admin@turfcleanpros.com.au",
                   address: {
                     "@type": "PostalAddress",
-                    streetAddress: "Tarneit",
-                    addressLocality: "Melbourne",
+                    streetAddress: "15 Nokota Circuit",
+                    addressLocality: "Bonnie Brook",
                     addressRegion: "VIC",
-                    postalCode: "3029",
+                    postalCode: "3335",
                     addressCountry: "AU",
                   },
                   geo: {
@@ -154,7 +154,7 @@ export default function RootLayout({
                   logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
                   contactPoint: {
                     "@type": "ContactPoint",
-                    telephone: "+61474226785",
+                    telephone: "+61433240617",
                     contactType: "customer service",
                     areaServed: "AU",
                     availableLanguage: "English",

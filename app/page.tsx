@@ -346,7 +346,7 @@ export default function HomePage() {
               { Icon: ShieldCheck,title: "Fully licensed & insured",            sub: "Your property is in safe hands."                 },
               { Icon: Award,      title: "Melbourne's most trusted",            sub: "4.9★ rated. Thousands of happy customers."       },
               { Icon: Clock,      title: "Same-day service available",         sub: "We work around your schedule."                   },
-              { Icon: MapPin,     title: "All Melbourne suburbs",              sub: "Tarneit-based. We cover everywhere."            },
+              { Icon: MapPin,     title: "All Melbourne suburbs",              sub: "Bonnie Brook-based. We cover everywhere."       },
             ].map(({ Icon, title, sub }) => (
               <div key={title} className="flex items-center gap-4 bg-white rounded-2xl px-4 py-4 shadow-card">
                 {/* Icon circle */}
@@ -384,7 +384,7 @@ export default function HomePage() {
               Get a Free Quote
             </button>
             <a
-              href="tel:0474226785"
+              href="tel:0433240617"
               className="inline-flex items-center gap-2 px-8 py-4 border border-white/20 text-white font-semibold rounded-xl text-sm hover:border-white/50 transition-colors"
             >
               <Phone className="w-4 h-4" />

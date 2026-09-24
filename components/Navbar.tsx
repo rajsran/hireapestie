@@ -54,7 +54,7 @@ export default function Navbar() {
 
         {/* Right: phone only */}
         <div className="shrink-0">
-          <a href="tel:0474226785" className="flex items-center">
+          <a href="tel:0433240617" className="flex items-center">
             <Image src="/callus.png" alt="Call Us" width={28} height={28} className="h-7 w-auto object-contain" />
           </a>
         </div>

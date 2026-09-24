@@ -11,9 +11,9 @@ const quickLinks = [
 
 const contactItems = [
   { Icon: MapPin, content: "Tarneit VIC 3029 · All Melbourne Suburbs", href: "https://maps.google.com/?q=Tarneit+VIC+3029" },
-  { Icon: Phone,  content: "0474 226 785",                               href: "tel:0474226785"  },
-  { Icon: Phone,  content: "0420 104 774",                               href: "tel:0420104774"  },
-  { Icon: Phone,  content: "03 9121 8020 (Landline)",                   href: "tel:0391218020"  },
+  { Icon: Phone,  content: "0433 240 617",                               href: "tel:0433240617"  },
+  { Icon: Phone,  content: "0433 240 617",                               href: "tel:0433240617"  },
+  { Icon: Phone,  content: "0433 240 617 (Landline)",                   href: "tel:0433240617"  },
   { Icon: Mail,   content: "admin@turfcleanpros.com.au",           href: "mailto:admin@turfcleanpros.com.au" },
 ];
 
@@ -86,11 +86,11 @@ export default function Footer() {
 
         {/* CTA */}
         <a
-          href="tel:0474226785"
+          href="tel:0433240617"
           className="flex items-center justify-center gap-2 w-full py-3.5 bg-violet-600 hover:bg-violet-700 active:scale-[0.98] text-white font-bold rounded-2xl text-sm transition-all mb-6"
         >
           <Phone className="w-4 h-4" />
-          Call 0474 226 785
+          Call 0433 240 617
         </a>
       </div>
 

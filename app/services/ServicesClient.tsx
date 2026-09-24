@@ -218,11 +218,11 @@ export default function ServicesClient() {
                       <ArrowRight className="w-4 h-4 hidden md:block group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                     <a
-                      href="tel:0420104774"
+                      href="tel:0433240617"
                       className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 text-ink-700 text-sm font-semibold rounded-2xl hover:border-violet-300 hover:text-violet-600 transition-all"
                     >
                       <Phone className="w-4 h-4" />
-                      <span className="hidden md:inline">0420 104 774</span>
+                      <span className="hidden md:inline">0433 240 617</span>
                       <span className="md:hidden">Call</span>
                     </a>
                   </div>
@@ -253,11 +253,11 @@ export default function ServicesClient() {
               Get a Free Quote
             </Link>
             <a
-              href="tel:0420104774"
+              href="tel:0433240617"
               className="flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white font-semibold rounded-2xl text-sm hover:border-white/50 transition-colors"
             >
               <Phone className="w-4 h-4" />
-              0420 104 774
+              0433 240 617
             </a>
           </div>
         </div>

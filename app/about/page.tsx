@@ -16,7 +16,7 @@ const values = [
   {
     icon: MapPin,
     title: "All Melbourne Suburbs",
-    desc: "Based in Tarneit, we service every suburb across Melbourne — north, south, east and west.",
+    desc: "Based in Bonnie Brook, we service every suburb across Melbourne — north, south, east and west.",
   },
   {
     icon: Droplets,
@@ -32,7 +32,7 @@ export const metadata = {
   openGraph: {
     title: "About Turf Clean Pros | Melbourne's Most Trusted Turf Cleaners",
     description:
-      "Melbourne's most trusted turf cleaners. Thousands of happy customers, top-rated on Google, fully insured. Based in Tarneit, all suburbs serviced.",
+      "Melbourne's most trusted turf cleaners. Thousands of happy customers, top-rated on Google, fully insured. Based in Bonnie Brook, all suburbs serviced.",
     url: "https://www.turfcleanpros.com.au/about",
   },
   alternates: { canonical: "https://www.turfcleanpros.com.au/about" },
@@ -78,7 +78,7 @@ export default function AboutPage() {
                 Turf Clean Pros was founded with a simple mission: provide Melbourne homeowners and businesses with a fast, reliable, and fully insured turf cleaning service they can trust.
               </p>
               <p>
-                We&apos;ve grown to become Melbourne&apos;s largest turf cleaning company — serving every suburb from our base in Tarneit. Trusted by thousands of happy customers, our reputation speaks for itself.
+                We&apos;ve grown to become Melbourne&apos;s largest turf cleaning company — serving every suburb from our base in Bonnie Brook. Trusted by thousands of happy customers, our reputation speaks for itself.
               </p>
               <p>
                 Whether it&apos;s a residential home, a commercial building, roof cleaning, repairs, or turf cleaning installation — we handle it all with care and professionalism.
@@ -125,8 +125,8 @@ export default function AboutPage() {
             <Link href="/contact" className="flex-1 max-w-[200px] text-center px-6 py-4 bg-violet-600 text-white font-bold rounded-full text-sm shadow-violet hover:bg-violet-700 transition-colors">
               Free Quote
             </Link>
-            <a href="tel:0474226785" className="flex-1 max-w-[200px] inline-flex items-center justify-center gap-2 px-6 py-4 border border-white/20 text-white font-semibold rounded-full text-sm hover:border-white/50 transition-colors">
-              0474 226 785
+            <a href="tel:0433240617" className="flex-1 max-w-[200px] inline-flex items-center justify-center gap-2 px-6 py-4 border border-white/20 text-white font-semibold rounded-full text-sm hover:border-white/50 transition-colors">
+              0433 240 617
             </a>
           </div>
         </div>

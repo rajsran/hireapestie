@@ -36,22 +36,13 @@ export default function HelpPage() {
 
         <div className="space-y-3">
           <a
-            href="tel:0420104774"
+            href="tel:0433240617"
             className="flex items-center justify-center gap-3 w-full bg-[#1A6B3C] text-white font-bold py-3 rounded-lg text-sm hover:bg-[#125230] transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
-            Call 0420 104 774
-          </a>
-          <a
-            href="tel:0391218020"
-            className="flex items-center justify-center gap-3 w-full bg-gray-100 text-[#1A6B3C] font-bold py-3 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            Landline: 03 9121 8020
+            Call 0433 240 617
           </a>
           <a
             href="mailto:admin@turfcleanpros.com.au"

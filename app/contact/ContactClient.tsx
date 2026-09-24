@@ -27,8 +27,7 @@ export default function ContactClient() {
               </div>
               <div>
                 <p className="text-ink-300 text-xs uppercase tracking-widest mb-1">Phone</p>
-                <a href="tel:0420104774" className="text-ink-900 font-semibold hover:text-violet-600 transition-colors block">0420 104 774</a>
-                <a href="tel:0391218020" className="text-ink-900 font-semibold hover:text-violet-600 transition-colors block">03 9121 8020 (Landline)</a>
+                <a href="tel:0433240617" className="text-ink-900 font-semibold hover:text-violet-600 transition-colors block">0433 240 617</a>
               </div>
             </li>
             <li className="flex items-start gap-4">
@@ -37,7 +36,7 @@ export default function ContactClient() {
               </div>
               <div>
                 <p className="text-ink-300 text-xs uppercase tracking-widest mb-1">Address</p>
-                <p className="text-ink-900 font-semibold">Tarneit VIC 3029</p>
+                <p className="text-ink-900 font-semibold">15 Nokota Circuit, Bonnie Brook VIC 3335</p>
                 <p className="text-ink-500">Servicing all Melbourne suburbs</p>
               </div>
             </li>
@@ -66,7 +65,7 @@ export default function ContactClient() {
           <div className="mt-10 aspect-video rounded-2xl overflow-hidden bg-white border border-gray-200 flex items-center justify-center shadow-card">
             <div className="text-center text-ink-300">
               <MapPin className="w-8 h-8 mx-auto mb-2" />
-              <p className="text-sm">Tarneit VIC 3029</p>
+              <p className="text-sm">Bonnie Brook VIC 3335</p>
             </div>
           </div>
         </div>
