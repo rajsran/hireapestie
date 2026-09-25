@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   page: {
     fontFamily: "Helvetica",
     fontSize: 10,
-    color: "#1a1a2e",
+    color: "#0D1A12",
     paddingTop: 48,
     paddingBottom: 60,
     paddingHorizontal: 48,
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     marginBottom: 36,
     paddingBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: "#1b2d6e",
+    borderBottomColor: "#1A6B3C",
   },
   logo: {
     width: 160,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   quoteNumber: {
     fontSize: 13,
     fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
+    color: "#0D1A12",
   },
   quoteDate: {
     fontSize: 9,
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    color: "#1b2d6e",
+    color: "#1A6B3C",
     letterSpacing: 1.2,
     textTransform: "uppercase",
     marginBottom: 8,
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
+    color: "#0D1A12",
     flex: 1,
   },
 
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#1b2d6e",
+    backgroundColor: "#1A6B3C",
     paddingVertical: 7,
     paddingHorizontal: 12,
     borderRadius: 4,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f3f4f6",
   },
   tableRowAlt: {
-    backgroundColor: "#eef1fb",
+    backgroundColor: "#EDF8F2",
   },
   tableCell: {
     fontSize: 9,
@@ -123,13 +123,13 @@ const styles = StyleSheet.create({
   tableCellBold: {
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
+    color: "#0D1A12",
     flex: 1,
   },
 
   // Estimate box
   estimateBox: {
-    backgroundColor: "#1a1a2e",
+    backgroundColor: "#125230",
     borderRadius: 8,
     padding: 20,
     marginBottom: 20,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   noEstimateTitle: {
     fontSize: 12,
     fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
+    color: "#0D1A12",
     marginBottom: 4,
   },
   noEstimateNote: {
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
 
   // Booking box
   bookingBox: {
-    backgroundColor: "#1b2d6e",
+    backgroundColor: "#1A6B3C",
     borderRadius: 8,
     padding: 14,
     marginBottom: 16,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   bookingBadge: {
     fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    color: "#1b2d6e",
+    color: "#1A6B3C",
     backgroundColor: "#ffffff",
     borderRadius: 4,
     paddingHorizontal: 8,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   footerRight: {
     fontSize: 8,
-    color: "#1b2d6e",
+    color: "#1A6B3C",
     fontFamily: "Helvetica-Bold",
     textAlign: "right",
     lineHeight: 1.5,

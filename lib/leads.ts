@@ -7,6 +7,8 @@ export interface Lead {
   email?: string;
   phone?: string;
   service?: string;
+  turfSize?: string;
+  serviceDetail?: string;
   levels?: string;
   roofType?: string;
   bedrooms?: string;

@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { leadId: string; finalAmount: number; updates?: Partial<{ levels: string; roofType: string; bedrooms: string; panels: string; type: string; size: string; timeline: string }>; bookingDate?: string; bookingTime?: string };
+  let body: { leadId: string; finalAmount: number; updates?: Partial<{ turfSize: string; serviceDetail: string; type: string; size: string; timeline: string }>; bookingDate?: string; bookingTime?: string };
   try {
     body = await req.json();
   } catch {

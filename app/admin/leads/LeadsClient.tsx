@@ -68,9 +68,8 @@ function formatDate(iso: string) {
   });
 }
 
-const LEVELS_OPTIONS   = ["1 level", "2 levels"];
-const ROOF_OPTIONS     = ["Tile", "Colorbond / Metal", "Wood Shingles"];
-const BEDROOM_OPTIONS  = ["1–2 bedrooms", "3–4 bedrooms", "5+ bedrooms"];
+const TURF_SIZE_OPTIONS = ["Under 50m²", "50–100m²", "100–200m²", "200m²+"];
+const ADDON_TYPE_OPTIONS = ["Add-on", "Standalone"];
 
 function Select({ label, value, options, onChange }: {
   label: string;
@@ -93,10 +92,10 @@ function Select({ label, value, options, onChange }: {
 }
 
 function isTurf(service?: string) {
-  return service === "Residential Turf Cleaning" || service === "Commercial Turf Cleaning";
+  return service === "Synthetic Turf Deep Clean";
 }
 function isMesh(service?: string) {
-  return service === "Bird Proofing Mesh";
+  return service === "Pet Odour & Stain Treatment" || service === "Moss & Algae Removal";
 }
 
 function LeadCard({ lead, onDelete, onQuoteSent }: {
@@ -108,10 +107,8 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
   const [showEdit, setShowEdit] = useState(false);
 
   // Editable fields
-  const [levels,   setLevels]   = useState(lead.levels   ?? LEVELS_OPTIONS[0]);
-  const [roofType, setRoofType] = useState(lead.roofType ?? ROOF_OPTIONS[0]);
-  const [bedrooms, setBedrooms] = useState(lead.bedrooms ?? BEDROOM_OPTIONS[0]);
-  const [panels,   setPanels]   = useState(lead.panels   ?? "");
+  const [turfSize,     setTurfSize]     = useState(lead.turfSize ?? TURF_SIZE_OPTIONS[0]);
+  const [serviceDetail, setServiceDetail] = useState(lead.serviceDetail ?? ADDON_TYPE_OPTIONS[0]);
   const [amount,      setAmount]      = useState(lead.finalQuote ? String(lead.finalQuote) : "");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
@@ -137,9 +134,9 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
     setSending(true);
 
     const updates = isTurf(lead.service)
-      ? { levels, roofType, bedrooms }
+      ? { turfSize }
       : isMesh(lead.service)
-        ? { panels }
+        ? { serviceDetail }
         : {};
 
     try {
@@ -244,13 +241,15 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
           {/* Job details (read-only summary when not editing) */}
           {!showEdit && (
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              {lead.levels   && <Detail label="Levels"   value={lead.levels} />}
-              {lead.roofType && <Detail label="Roof"     value={lead.roofType} />}
-              {lead.bedrooms && <Detail label="Bedrooms" value={lead.bedrooms} />}
-              {lead.panels   && <Detail label="Panels"   value={lead.panels} />}
-              {lead.type     && <Detail label="Type"     value={lead.type} />}
-              {lead.size     && <Detail label="Size"     value={lead.size} />}
-              {lead.timeline && <Detail label="Timeline" value={lead.timeline} />}
+              {lead.turfSize     && <Detail label="Turf Size"   value={lead.turfSize} />}
+              {lead.serviceDetail && <Detail label="Treatment"  value={lead.serviceDetail} />}
+              {lead.levels       && <Detail label="Levels"      value={lead.levels} />}
+              {lead.roofType     && <Detail label="Roof"        value={lead.roofType} />}
+              {lead.bedrooms     && <Detail label="Bedrooms"    value={lead.bedrooms} />}
+              {lead.panels       && <Detail label="Panels"      value={lead.panels} />}
+              {lead.type         && <Detail label="Type"        value={lead.type} />}
+              {lead.size         && <Detail label="Size"        value={lead.size} />}
+              {lead.timeline     && <Detail label="Timeline"    value={lead.timeline} />}
             </div>
           )}
 
@@ -283,24 +282,10 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
 
                 {/* Editable job fields */}
                 {isTurf(lead.service) && (
-                  <div className="grid grid-cols-1 gap-3">
-                    <Select label="Levels"   value={levels}   options={LEVELS_OPTIONS}  onChange={setLevels} />
-                    <Select label="Roof Type" value={roofType} options={ROOF_OPTIONS}    onChange={setRoofType} />
-                    <Select label="Bedrooms" value={bedrooms} options={BEDROOM_OPTIONS}  onChange={setBedrooms} />
-                  </div>
+                  <Select label="Turf Size" value={turfSize} options={TURF_SIZE_OPTIONS} onChange={setTurfSize} />
                 )}
                 {isMesh(lead.service) && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Panels</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={panels.replace(/\D/g, "")}
-                      onChange={e => setPanels(e.target.value ? `${e.target.value} panels` : "")}
-                      placeholder="e.g. 20"
-                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
-                    />
-                  </div>
+                  <Select label="Type" value={serviceDetail} options={ADDON_TYPE_OPTIONS} onChange={setServiceDetail} />
                 )}
 
                 {/* Final amount */}
