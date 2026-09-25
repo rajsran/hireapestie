@@ -10,11 +10,9 @@ const quickLinks = [
 ];
 
 const contactItems = [
-  { Icon: MapPin, content: "Tarneit VIC 3029 · All Melbourne Suburbs", href: "https://maps.google.com/?q=Tarneit+VIC+3029" },
-  { Icon: Phone,  content: "0433 240 617",                               href: "tel:0433240617"  },
-  { Icon: Phone,  content: "0433 240 617",                               href: "tel:0433240617"  },
-  { Icon: Phone,  content: "0433 240 617 (Landline)",                   href: "tel:0433240617"  },
-  { Icon: Mail,   content: "admin@turfcleanpros.com.au",           href: "mailto:admin@turfcleanpros.com.au" },
+  { Icon: MapPin, content: "Bonnie Brook VIC 3335 · All Melbourne Suburbs", href: "https://maps.google.com/?q=Bonnie+Brook+VIC+3335" },
+  { Icon: Phone,  content: "0433 240 617",                                   href: "tel:0433240617"  },
+  { Icon: Mail,   content: "admin@turfcleanpros.com.au",                     href: "mailto:admin@turfcleanpros.com.au" },
 ];
 
 export default function Footer() {

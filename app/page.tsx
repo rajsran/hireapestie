@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
-import { ArrowRight, Phone, Star, Sparkles, Heart, Leaf, Wind, CalendarCheck, Award, Clock, MapPin, LayoutGrid, FileText, Wrench, ShieldCheck } from "lucide-react";
+import { ArrowRight, Phone, Star, Sparkles, Heart, Leaf, Wind, CalendarCheck, Award, Clock, MapPin, FileText, Wrench, ShieldCheck } from "lucide-react";
 import QuoteChat from "@/components/QuoteChat";
 
 const services = [
@@ -234,13 +234,6 @@ export default function HomePage() {
 
           {/* Secondary CTAs */}
           <div className="flex gap-3 w-full md:max-w-sm mb-8">
-            <a
-              href="/projects"
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-violet-600 text-violet-600 font-bold rounded-full hover:bg-violet-50 active:scale-[0.98] transition-all duration-200 text-sm"
-            >
-              <LayoutGrid className="w-4 h-4" />
-              Our Projects
-            </a>
             <a
               href="/services"
               className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-violet-600 text-violet-600 font-bold rounded-full hover:bg-violet-50 active:scale-[0.98] transition-all duration-200 text-sm"

@@ -18,14 +18,9 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
     : "";
 
   const jobRows = [
-    ["Service",  invoice.service],
-    ["Levels",   invoice.levels],
-    ["Roof Type",invoice.roofType],
-    ["Bedrooms", invoice.bedrooms],
-    ["Panels",   invoice.panels],
-    ["Type",     invoice.type],
-    ["Size",     invoice.size],
-    ["Timeline", invoice.timeline],
+    ["Service",   invoice.service],
+    ["Turf Size", invoice.turfSize],
+    ["Treatment", invoice.serviceDetail],
   ].filter(([, v]) => v);
 
   const jobTableHtml = jobRows.length > 0 ? `
@@ -68,7 +63,7 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
       </p>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
-      <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · ABN 44 686 088 264 · Tarneit VIC 3029</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · ABN 27 700 387 079 · Bonnie Brook VIC 3335</p>
       <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617</p>
     </div>
   </div>`;

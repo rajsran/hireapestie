@@ -4,7 +4,7 @@ import path from "path";
 import { QuoteLead, calcEstimate, isTurfService, calcTurfEstimate } from "./pricing";
 
 // ── Update this with the real ABN ──────────────────────────────────────────────
-const COMPANY_ABN = "44 686 088 264";
+const COMPANY_ABN = "27 700 387 079";
 const LOGO_PATH = path.join(process.cwd(), "public", "logo.png");
 
 const styles = StyleSheet.create({
@@ -266,30 +266,12 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
   const bookingTimeStr = booking?.bookingTime || null;
   const quoteNum = `GCF-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
 
-  const isLandscaping = lead.service === "Landscaping";
-  const isTurf = isTurfService(lead.service);
-  const jobDetails = isLandscaping
-    ? [
-        { label: "Service", value: lead.service ?? "—" },
-      ]
-    : isTurf
-      ? lead.service === "Bird Proofing Mesh"
-        ? [
-            { label: "Service", value: lead.service ?? "—" },
-            { label: "Panels",  value: lead.panels  ?? "—" },
-          ]
-        : [
-            { label: "Service",   value: lead.service  ?? "—" },
-            { label: "Levels",    value: lead.levels   ?? "—" },
-            { label: "Roof Type", value: lead.roofType ?? "—" },
-            { label: "Bedrooms",  value: lead.bedrooms ?? "—" },
-          ]
-      : [
-          { label: "Service",  value: lead.service  ?? "—" },
-          { label: "Type",     value: lead.type     ?? "—" },
-          { label: "Size",     value: lead.size ? `${lead.size} m²` : "—" },
-          { label: "Timeline", value: lead.timeline ?? "—" },
-        ];
+  const jobDetails = [
+    { label: "Service",        value: lead.service       ?? "—" },
+    ...(lead.turfSize     ? [{ label: "Turf Size",     value: lead.turfSize }]     : []),
+    ...(lead.serviceDetail ? [{ label: "Treatment",    value: lead.serviceDetail }] : []),
+    { label: "Suburb",         value: lead.suburb        ?? "—" },
+  ];
 
   return (
     React.createElement(Document, { title: `Turf Clean Pros Quote — ${lead.name ?? "Customer"}` },
@@ -388,9 +370,7 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
                     : `$${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}`
                 ),
                 React.createElement(Text, { style: styles.estimateNote },
-                  isTurf
-                    ? `Starting price · Final quote confirmed on-site`
-                    : `Supply & install · Based on ${lead.size?.toLowerCase() ?? "selected size"}\nAccurate quote provided after free on-site inspection`
+                  `Starting price · Final quote confirmed on-site`
                 ),
               )
             : React.createElement(View, { style: styles.noEstimateBox },
@@ -430,7 +410,7 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
         // ── Footer ──
         React.createElement(View, { style: styles.footer },
           React.createElement(Text, { style: styles.footerLeft },
-            `Turf Clean Pros · ABN ${COMPANY_ABN}\nTarneit VIC 3029 · All Melbourne Suburbs`
+            `Turf Clean Pros · ABN ${COMPANY_ABN}\nBonnie Brook VIC 3335 · All Melbourne Suburbs`
           ),
           React.createElement(Text, { style: styles.footerRight },
             "0433 240 617\nadmin@turfcleanpros.com.au"

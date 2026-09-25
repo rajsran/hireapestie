@@ -2,7 +2,7 @@ import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@
 import React from "react";
 import path from "path";
 
-const COMPANY_ABN = "44 686 088 264";
+const COMPANY_ABN = "27 700 387 079";
 const LOGO_PATH = path.join(process.cwd(), "public", "logo.png");
 
 const styles = StyleSheet.create({
@@ -103,13 +103,8 @@ export interface InvoiceData {
   customerPostcode?: string;
   service?: string;
   // Quote details
-  levels?: string;
-  roofType?: string;
-  bedrooms?: string;
-  panels?: string;
-  type?: string;
-  size?: string;
-  timeline?: string;
+  turfSize?: string;
+  serviceDetail?: string;
   amount: number;
   dueDate?: string;
   notes?: string;
@@ -129,13 +124,8 @@ function InvoicePdfDocument({ invoice }: { invoice: InvoiceData }) {
   ];
 
   const jobDetails: { label: string; value: string }[] = [];
-  if (invoice.levels)   jobDetails.push({ label: "Levels",    value: invoice.levels });
-  if (invoice.roofType) jobDetails.push({ label: "Roof Type", value: invoice.roofType });
-  if (invoice.bedrooms) jobDetails.push({ label: "Bedrooms",  value: invoice.bedrooms });
-  if (invoice.panels)   jobDetails.push({ label: "Panels",    value: invoice.panels });
-  if (invoice.type)     jobDetails.push({ label: "Type",      value: invoice.type });
-  if (invoice.size)     jobDetails.push({ label: "Size",      value: invoice.size });
-  if (invoice.timeline) jobDetails.push({ label: "Timeline",  value: invoice.timeline });
+  if (invoice.turfSize)     jobDetails.push({ label: "Turf Size",  value: invoice.turfSize });
+  if (invoice.serviceDetail) jobDetails.push({ label: "Treatment", value: invoice.serviceDetail });
 
   return (
     React.createElement(Document, { title: `Invoice ${invoice.invoiceNumber} — ${invoice.customerName ?? "Customer"}` },
@@ -282,7 +272,7 @@ function InvoicePdfDocument({ invoice }: { invoice: InvoiceData }) {
         // Footer
         React.createElement(View, { style: styles.footer },
           React.createElement(Text, { style: styles.footerLeft },
-            `Turf Clean Pros · ABN ${COMPANY_ABN}\nTarneit VIC 3029 · All Melbourne Suburbs`
+            `Turf Clean Pros · ABN ${COMPANY_ABN}\nBonnie Brook VIC 3335 · All Melbourne Suburbs`
           ),
           React.createElement(Text, { style: styles.footerRight },
             "0433 240 617\nadmin@turfcleanpros.com.au"

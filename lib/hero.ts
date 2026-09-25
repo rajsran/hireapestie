@@ -1,9 +1,10 @@
 import { put, get, list } from '@vercel/blob';
 
 export async function getHeroImages(): Promise<string[]> {
-  const { blobs } = await list({ prefix: 'hero/meta.json' });
-  if (!blobs.length) return [];
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
   try {
+    const { blobs } = await list({ prefix: 'hero/meta.json' });
+    if (!blobs.length) return [];
     const result = await get(blobs[0].url, { access: 'private' });
     if (!result) return [];
     const text = await new Response(result.stream).text();

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     let quoteRow: Record<string, unknown> = {};
     if (row.quote_id) {
       const qRows = await sql`
-        SELECT service, levels, roof_type, bedrooms, panels, type, size, timeline
+        SELECT service, turf_size, service_detail
         FROM quotes WHERE id = ${row.quote_id as string} LIMIT 1
       `;
       if (qRows.length) quoteRow = qRows[0] as Record<string, unknown>;
@@ -63,14 +63,9 @@ export async function POST(req: NextRequest) {
       customerPhone:    row.customer_phone  as string | undefined,
       customerSuburb:   row.customer_suburb   as string | undefined,
       customerPostcode: row.customer_postcode as string | undefined,
-      service:   (quoteRow.service ?? row.service ?? row.quote_service) as string | undefined,
-      levels:    quoteRow.levels    as string | undefined,
-      roofType:  quoteRow.roof_type as string | undefined,
-      bedrooms:  quoteRow.bedrooms  as string | undefined,
-      panels:    quoteRow.panels    as string | undefined,
-      type:      quoteRow.type      as string | undefined,
-      size:      quoteRow.size      as string | undefined,
-      timeline:  quoteRow.timeline  as string | undefined,
+      service:       (quoteRow.service ?? row.service ?? row.quote_service) as string | undefined,
+      turfSize:      quoteRow.turf_size      as string | undefined,
+      serviceDetail: quoteRow.service_detail as string | undefined,
       amount:    Number(row.amount),
       dueDate:   row.due_date  as string | undefined,
       notes:     row.notes     as string | undefined,
