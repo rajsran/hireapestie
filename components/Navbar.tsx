@@ -20,12 +20,12 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#dce9e5] shadow-sm" style={{ backgroundColor: "#F5F9F8" }}>
 
       {/* ── Desktop bar ── */}
       <div className="hidden md:flex max-w-7xl mx-auto px-3 py-2.5 items-center justify-between">
         <Link href="/" className="flex items-center shrink-0">
-          <Image src="/logo.png" alt="Turf Clean Pros" width={160} height={48} className="h-11 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="Turf Clean Pros" width={120} height={36} className="h-9 w-auto object-contain" priority />
         </Link>
         <div className="flex items-center gap-8">
           {links.map((l) => (
@@ -49,7 +49,7 @@ export default function Navbar() {
 
         {/* Center: logo */}
         <Link href="/" className="flex-1 flex items-center justify-center">
-          <Image src="/logo.png" alt="Turf Clean Pros" width={130} height={44} className="h-10 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="Turf Clean Pros" width={90} height={30} className="h-8 w-auto object-contain" priority />
         </Link>
 
         {/* Right: phone only */}
