@@ -1,4 +1,5 @@
-import { list, put, del } from '@vercel/blob';
+import { neon } from '@neondatabase/serverless';
+import { put } from '@vercel/blob';
 
 export interface Lead {
   id: string;
@@ -28,17 +29,51 @@ export interface Lead {
   pdfUrl?: string;
 }
 
-async function getBlobJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Blob fetch failed: ${url}`);
-  return res.json() as Promise<T>;
+function getDb() {
+  return neon(process.env.DATABASE_URL!);
+}
+
+function rowToLead(r: Record<string, unknown>): Lead {
+  return {
+    id: r.id as string,
+    createdAt: r.created_at ? new Date(r.created_at as string).toISOString() : '',
+    name: r.name as string | undefined,
+    email: r.email as string | undefined,
+    phone: r.phone as string | undefined,
+    service: r.service as string | undefined,
+    turfSize: r.turf_size as string | undefined,
+    serviceDetail: r.service_detail as string | undefined,
+    levels: r.levels as string | undefined,
+    roofType: r.roof_type as string | undefined,
+    bedrooms: r.bedrooms as string | undefined,
+    panels: r.panels as string | undefined,
+    postcode: r.postcode as string | undefined,
+    suburb: r.suburb as string | undefined,
+    type: r.type as string | undefined,
+    size: r.size as string | undefined,
+    timeline: r.timeline as string | undefined,
+    estimate: (r.estimate_low != null && r.estimate_high != null)
+      ? { low: Number(r.estimate_low), high: Number(r.estimate_high) }
+      : null,
+    finalQuote: r.final_quote != null ? Number(r.final_quote) : undefined,
+    quoteSentAt: r.quote_sent_at ? new Date(r.quote_sent_at as string).toISOString() : undefined,
+    accepted: r.accepted as boolean | undefined,
+    acceptedAt: r.accepted_at ? new Date(r.accepted_at as string).toISOString() : undefined,
+    address: r.address as string | undefined,
+    shortId: r.short_id as string | undefined,
+    pdfUrl: r.pdf_url as string | undefined,
+  };
 }
 
 export async function listLeads(): Promise<Lead[]> {
-  const { blobs } = await list({ prefix: 'leads/', token: process.env.BLOB_READ_WRITE_TOKEN });
-  if (!blobs.length) return [];
-  const leads = await Promise.all(blobs.map(b => getBlobJson<Lead>(b.url)));
-  return leads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const sql = getDb();
+  const rows = await sql`
+    SELECT q.*, c.name, c.email, c.phone, c.suburb, c.postcode
+    FROM quotes q
+    LEFT JOIN customers c ON c.id = q.customer_id
+    ORDER BY q.created_at DESC
+  `;
+  return rows.map(rowToLead);
 }
 
 export async function listLeadsPaginated(page: number, pageSize = 10): Promise<{
@@ -46,34 +81,60 @@ export async function listLeadsPaginated(page: number, pageSize = 10): Promise<{
   total: number;
   totalPages: number;
 }> {
-  const { blobs } = await list({ prefix: 'leads/', token: process.env.BLOB_READ_WRITE_TOKEN });
-  const total = blobs.length;
+  const sql = getDb();
+  const offset = (page - 1) * pageSize;
+  const [countRows, rows] = await Promise.all([
+    sql`SELECT COUNT(*)::int AS total FROM quotes`,
+    sql`
+      SELECT q.*, c.name, c.email, c.phone, c.suburb, c.postcode
+      FROM quotes q
+      LEFT JOIN customers c ON c.id = q.customer_id
+      ORDER BY q.created_at DESC
+      LIMIT ${pageSize} OFFSET ${offset}
+    `,
+  ]);
+  const total = Number(countRows[0]?.total ?? 0);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  // Sort blob metadata by uploadedAt (no content fetch yet) then slice to page
-  const sorted = [...blobs].sort(
-    (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-  );
-  const pageBlobs = sorted.slice((page - 1) * pageSize, page * pageSize);
-  const leads = await Promise.all(pageBlobs.map(b => getBlobJson<Lead>(b.url)));
-
-  return { leads, total, totalPages };
-}
-
-export async function saveLead(lead: Lead): Promise<void> {
-  await put(`leads/${lead.id}.json`, JSON.stringify(lead), {
-    access: 'public',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-  });
+  return { leads: rows.map(rowToLead), total, totalPages };
 }
 
 export async function getLead(id: string): Promise<Lead | null> {
-  const { blobs } = await list({ prefix: `leads/${id}.json`, token: process.env.BLOB_READ_WRITE_TOKEN });
-  if (!blobs.length) return null;
-  return getBlobJson<Lead>(blobs[0].url);
+  const sql = getDb();
+  const rows = await sql`
+    SELECT q.*, c.name, c.email, c.phone, c.suburb, c.postcode
+    FROM quotes q
+    LEFT JOIN customers c ON c.id = q.customer_id
+    WHERE q.id = ${id}
+  `;
+  if (!rows.length) return null;
+  return rowToLead(rows[0]);
+}
+
+export async function saveLead(lead: Lead): Promise<void> {
+  const sql = getDb();
+  await sql`
+    UPDATE quotes SET
+      service        = COALESCE(${lead.service ?? null}, service),
+      turf_size      = COALESCE(${lead.turfSize ?? null}, turf_size),
+      service_detail = COALESCE(${lead.serviceDetail ?? null}, service_detail),
+      levels         = COALESCE(${lead.levels ?? null}, levels),
+      roof_type      = COALESCE(${lead.roofType ?? null}, roof_type),
+      bedrooms       = COALESCE(${lead.bedrooms ?? null}, bedrooms),
+      panels         = COALESCE(${lead.panels ?? null}, panels),
+      type           = COALESCE(${lead.type ?? null}, type),
+      size           = COALESCE(${lead.size ?? null}, size),
+      timeline       = COALESCE(${lead.timeline ?? null}, timeline),
+      estimate_low   = COALESCE(${lead.estimate?.low ?? null}, estimate_low),
+      estimate_high  = COALESCE(${lead.estimate?.high ?? null}, estimate_high),
+      final_quote    = COALESCE(${lead.finalQuote ?? null}, final_quote),
+      quote_sent_at  = COALESCE(${lead.quoteSentAt ? lead.quoteSentAt : null}::timestamptz, quote_sent_at),
+      accepted       = COALESCE(${lead.accepted ?? null}, accepted),
+      accepted_at    = COALESCE(${lead.acceptedAt ? lead.acceptedAt : null}::timestamptz, accepted_at),
+      address        = COALESCE(${lead.address ?? null}, address),
+      short_id       = COALESCE(${lead.shortId ?? null}, short_id),
+      pdf_url        = COALESCE(${lead.pdfUrl ?? null}, pdf_url)
+    WHERE id = ${lead.id}
+  `;
 }
 
 export async function savePdf(shortId: string, pdfBuffer: Buffer): Promise<string> {
@@ -88,6 +149,6 @@ export async function savePdf(shortId: string, pdfBuffer: Buffer): Promise<strin
 }
 
 export async function deleteLead(id: string): Promise<void> {
-  const { blobs } = await list({ prefix: `leads/${id}.json`, token: process.env.BLOB_READ_WRITE_TOKEN });
-  if (blobs.length) await Promise.all(blobs.map(b => del(b.url, { token: process.env.BLOB_READ_WRITE_TOKEN })));
+  const sql = getDb();
+  await sql`DELETE FROM quotes WHERE id = ${id}`;
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { list } from "@vercel/blob";
+import { neon } from "@neondatabase/serverless";
 
 export const runtime = "nodejs";
 
@@ -15,15 +15,13 @@ export async function GET(
   }
 
   try {
-    const { blobs } = await list({
-      prefix: `pdfs/${id}.pdf`,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
-    if (blobs.length) {
-      return NextResponse.redirect(blobs[0].url);
+    const sql = neon(process.env.DATABASE_URL!);
+    const rows = await sql`SELECT pdf_url FROM quotes WHERE short_id = ${id} LIMIT 1`;
+    if (rows.length && rows[0].pdf_url) {
+      return NextResponse.redirect(rows[0].pdf_url as string);
     }
   } catch {
-    // fall through to homepage redirect
+    // fall through
   }
 
   return NextResponse.redirect(siteUrl);

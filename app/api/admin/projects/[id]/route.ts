@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { del } from '@vercel/blob';
 import { checkAdminRequest } from '@/lib/adminAuth';
 import { deleteProject, saveProject, getProject, type Project } from '@/lib/projects';
 
@@ -22,11 +21,6 @@ export async function PUT(
     imageUrls: string[];
     removedUrls: string[];
   };
-
-  // Delete removed images from Vercel Blob
-  if (body.removedUrls?.length) {
-    await Promise.all(body.removedUrls.map(url => del(url)));
-  }
 
   const updated: Project = {
     ...existing,

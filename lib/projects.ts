@@ -1,4 +1,4 @@
-import { list, put, del, get } from '@vercel/blob';
+import { neon } from '@neondatabase/serverless';
 
 export interface Project {
   id: string;
@@ -8,43 +8,49 @@ export interface Project {
   createdAt: string;
 }
 
-async function getBlobJson<T>(url: string): Promise<T> {
-  const result = await get(url, { access: 'private' });
-  if (!result) throw new Error(`Blob not found: ${url}`);
-  const text = await new Response(result.stream).text();
-  return JSON.parse(text) as T;
+function getDb() {
+  return neon(process.env.DATABASE_URL!);
 }
 
 export async function listProjects(): Promise<Project[]> {
-  const { blobs } = await list({ prefix: 'projects/' });
-  const metaBlobs = blobs.filter(b => b.pathname.endsWith('/meta.json'));
-  if (!metaBlobs.length) return [];
-
-  const projects = await Promise.all(
-    metaBlobs.map(b => getBlobJson<Project>(b.url))
-  );
-
-  return projects.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const sql = getDb();
+  const rows = await sql`SELECT id, title, description, image_urls, created_at FROM projects ORDER BY created_at DESC`;
+  return rows.map(r => ({
+    id: r.id as string,
+    title: r.title as string,
+    description: (r.description ?? '') as string,
+    imageUrls: (r.image_urls ?? []) as string[],
+    createdAt: String(r.created_at),
+  }));
 }
 
 export async function saveProject(project: Project): Promise<void> {
-  await put(`projects/${project.id}/meta.json`, JSON.stringify(project), {
-    access: 'private',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-  });
+  const sql = getDb();
+  await sql`
+    INSERT INTO projects (id, title, description, image_urls, created_at)
+    VALUES (${project.id}, ${project.title}, ${project.description}, ${project.imageUrls}, ${project.createdAt})
+    ON CONFLICT (id) DO UPDATE SET
+      title       = EXCLUDED.title,
+      description = EXCLUDED.description,
+      image_urls  = EXCLUDED.image_urls
+  `;
 }
 
 export async function getProject(id: string): Promise<Project | null> {
-  const { blobs } = await list({ prefix: `projects/${id}/meta.json` });
-  if (!blobs.length) return null;
-  return getBlobJson<Project>(blobs[0].url);
+  const sql = getDb();
+  const rows = await sql`SELECT id, title, description, image_urls, created_at FROM projects WHERE id = ${id}`;
+  if (!rows.length) return null;
+  const r = rows[0];
+  return {
+    id: r.id as string,
+    title: r.title as string,
+    description: (r.description ?? '') as string,
+    imageUrls: (r.image_urls ?? []) as string[],
+    createdAt: String(r.created_at),
+  };
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const { blobs } = await list({ prefix: `projects/${id}/` });
-  if (blobs.length) await Promise.all(blobs.map(b => del(b.url)));
+  const sql = getDb();
+  await sql`DELETE FROM projects WHERE id = ${id}`;
 }

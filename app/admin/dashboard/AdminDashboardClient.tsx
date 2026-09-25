@@ -8,9 +8,7 @@ import { Project } from "@/lib/projects";
 import { Plus, Trash2, LogOut, FolderOpen, Pencil, Images, LayoutGrid, Users, FileText, Receipt } from "lucide-react";
 
 function blobSrc(url: string) {
-  return url.includes('.private.blob.vercel-storage.com')
-    ? `/api/image?url=${encodeURIComponent(url)}`
-    : url;
+  return url;
 }
 
 export default function AdminDashboardClient({ projects: initial }: { projects: Project[] }) {

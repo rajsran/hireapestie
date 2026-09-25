@@ -2,7 +2,7 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { QuoteLead, isTurfService, calcTurfEstimate } from "@/lib/pricing";
 import { generateQuotePdf } from "@/lib/generateQuotePdf";
 import { sendQuoteEmail } from "@/lib/sendQuoteEmail";
-import { saveLead, savePdf } from "@/lib/leads";
+import { savePdf } from "@/lib/leads";
 import { shortenUrl } from "@/lib/shortenUrl";
 import { getDb, initDb } from "@/lib/db";
 
@@ -74,10 +74,12 @@ async function upsertCustomerAndQuote(
 
     await sql`
       INSERT INTO quotes (
-        id, customer_id, service, levels, roof_type, bedrooms, panels,
+        id, customer_id, service, turf_size, service_detail,
+        levels, roof_type, bedrooms, panels,
         type, size, timeline, estimate_low, estimate_high, pdf_url, short_id, created_at
       ) VALUES (
         ${quoteId}, ${customerId}, ${lead.service ?? null},
+        ${lead.turfSize ?? null}, ${lead.serviceDetail ?? null},
         ${lead.levels ?? null}, ${lead.roofType ?? null}, ${lead.bedrooms ?? null},
         ${lead.panels ?? null}, ${lead.type ?? null}, ${lead.size ?? null},
         ${lead.timeline ?? null},
@@ -128,12 +130,7 @@ export async function POST(req: NextRequest) {
         console.error("⚠️  PDF generation failed:", err);
       }
 
-      // Persist lead to Blob + DB in parallel
-      await Promise.all([
-        saveLead({ id: leadId, createdAt: new Date().toISOString(), shortId, pdfUrl, ...lead, estimate })
-          .catch(err => console.error("⚠️  Blob lead save failed:", err)),
-        upsertCustomerAndQuote(lead, leadId, shortId, estimate, pdfUrl),
-      ]);
+      await upsertCustomerAndQuote(lead, leadId, shortId, estimate, pdfUrl);
 
       // Send SMS last (needs pdfUrl)
       if (lead.phone) {

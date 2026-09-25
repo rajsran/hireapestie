@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 
 export function getDb() {
-  return neon(process.env.NEON_DATABASE_URL!);
+  return neon(process.env.DATABASE_URL!);
 }
 
 export async function initDb() {
@@ -58,6 +58,17 @@ export async function initDb() {
     )
   `;
   await sql`ALTER TABLE invoices ADD COLUMN IF NOT EXISTS service TEXT`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS projects (
+      id          TEXT PRIMARY KEY,
+      title       TEXT NOT NULL DEFAULT '',
+      description TEXT DEFAULT '',
+      image_urls  TEXT[] DEFAULT '{}',
+      created_at  TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS turf_size TEXT`;
+  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS service_detail TEXT`;
 }
 
 export interface DbCustomer {

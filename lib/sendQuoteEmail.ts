@@ -257,7 +257,7 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
 export async function sendAcceptedNotificationEmail(lead: QuoteLead & { finalQuote?: number }, address: string): Promise<void> {
   const client = getClient();
   const FROM_EMAIL    = process.env.POSTMARK_FROM_EMAIL!;
-  const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL!;
+  const BUSINESS_EMAIL = process.env.ADMIN_EMAIL ?? process.env.POSTMARK_FROM_EMAIL!;
   const timestamp = new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne" });
 
   const html = `
@@ -301,7 +301,7 @@ export async function sendAcceptedNotificationEmail(lead: QuoteLead & { finalQuo
 export async function sendHelpNotificationEmail(lead: QuoteLead & { finalQuote?: number }): Promise<void> {
   const client = getClient();
   const FROM_EMAIL     = process.env.POSTMARK_FROM_EMAIL!;
-  const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL!;
+  const BUSINESS_EMAIL = process.env.ADMIN_EMAIL ?? process.env.POSTMARK_FROM_EMAIL!;
   const timestamp = new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne" });
 
   const html = `
@@ -349,7 +349,7 @@ export async function sendEarlyLeadEmail(contact: {
 }): Promise<void> {
   const client = getClient();
   const FROM_EMAIL     = process.env.POSTMARK_FROM_EMAIL!;
-  const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL!;
+  const BUSINESS_EMAIL = process.env.ADMIN_EMAIL ?? process.env.POSTMARK_FROM_EMAIL!;
   const timestamp = new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne" });
 
   const rows = [
@@ -396,7 +396,7 @@ export async function sendEarlyLeadEmail(contact: {
 export async function sendQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, leadId?: string): Promise<void> {
   const client       = getClient();
   const FROM_EMAIL   = process.env.POSTMARK_FROM_EMAIL!;
-  const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL!;
+  const BUSINESS_EMAIL = process.env.ADMIN_EMAIL ?? process.env.POSTMARK_FROM_EMAIL!;
   const estimate = isTurfService(lead.service) ? calcTurfEstimate(lead) : calcEstimate(lead);
   const pdfAttachment = {
     Name: `TurfCleanPros-Quote-${lead.name?.replace(/\s+/g, "-") ?? "Customer"}.pdf`,
