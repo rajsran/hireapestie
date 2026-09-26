@@ -57,7 +57,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-5 grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div className="relative aspect-[4/3] md:aspect-square rounded-3xl overflow-hidden shadow-card-lg">
             <Image
-              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80"
+              src="/aboutus.jpeg"
               alt="Turf Clean Pros at work"
               fill
               className="object-cover"
