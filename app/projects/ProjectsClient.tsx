@@ -225,7 +225,7 @@ export default function ProjectsClient() {
             Our Projects
           </h1>
           <p className="text-gray-500 text-sm max-w-xl mx-auto">
-            Real work by Turf Clean Pros — turf cleaning, roof cleaning, repairs and guard installations across all Melbourne suburbs.
+            Real work by Turf Clean Pros — turf cleaning and installation across all Melbourne suburbs.
           </p>
         </div>
 

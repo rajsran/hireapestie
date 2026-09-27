@@ -6,7 +6,7 @@ const values = [
   {
     icon: Shield,
     title: "Quality First",
-    desc: "We never cut corners. Every turf, every roof — cleaned or repaired to the highest standard.",
+    desc: "We never cut corners. Every turf — cleaned to the highest standard.",
   },
   {
     icon: Users,
@@ -81,7 +81,7 @@ export default function AboutPage() {
                 We&apos;ve grown to become Melbourne&apos;s largest turf cleaning company — serving every suburb from our base in Bonnie Brook. Trusted by thousands of happy customers, our reputation speaks for itself.
               </p>
               <p>
-                Whether it&apos;s a residential home, a commercial building, roof cleaning, repairs, or turf cleaning installation — we handle it all with care and professionalism.
+                Whether it&apos;s a residential home or a commercial building, we handle turf cleaning and installation with care and professionalism.
               </p>
             </div>
             <Link
