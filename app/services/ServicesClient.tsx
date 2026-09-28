@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Phone, Check, Sparkles, Heart, Leaf, Wind, CalendarCheck, FileText, ArrowRight } from "lucide-react";
+import QuoteChat from "@/components/QuoteChat";
 
 const services = [
   {
@@ -21,7 +21,7 @@ const services = [
       "Residential & commercial turf",
     ],
     pricing: "From $150 (up to ~25m²) · $6–8/m² for larger areas",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80",
+    image: "/service.jpeg",
   },
   {
     id: "pet-odour-stain-treatment",
@@ -38,7 +38,7 @@ const services = [
       "Fast-drying formula",
     ],
     pricing: "$60–100 as add-on · $120–160 standalone",
-    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80",
+    image: "/service.jpeg",
   },
   {
     id: "moss-algae-removal",
@@ -55,7 +55,7 @@ const services = [
       "Prevents regrowth for longer",
     ],
     pricing: "$80–150 as add-on or standalone",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80",
+    image: "/service.jpeg",
   },
   {
     id: "debris-leaf-clearing",
@@ -72,7 +72,7 @@ const services = [
       "Residential & commercial",
     ],
     pricing: "$60–100",
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80",
+    image: "/service.jpeg",
   },
   {
     id: "scheduled-maintenance-plans",
@@ -89,12 +89,13 @@ const services = [
       "Suits residential & commercial",
     ],
     pricing: "10–15% off standard rates · Quarterly plans",
-    image: "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=900&q=80",
+    image: "/service.jpeg",
   },
 ];
 
 export default function ServicesClient() {
   const [active, setActive] = useState(services[0].id);
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   return (
     <>
@@ -209,14 +210,14 @@ export default function ServicesClient() {
                   </div>
 
                   <div className="flex gap-3">
-                    <Link
-                      href="/contact"
+                    <button
+                      onClick={() => setQuoteOpen(true)}
                       className="flex-1 md:flex-none md:px-7 flex items-center justify-center gap-2 py-3 bg-violet-600 text-white text-sm font-bold rounded-2xl shadow-violet active:scale-[0.98] transition-all hover:bg-violet-700 group"
                     >
                       <FileText className="w-4 h-4" />
                       Get Free Quote
                       <ArrowRight className="w-4 h-4 hidden md:block group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
+                    </button>
                     <a
                       href="tel:0433240617"
                       className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 text-ink-700 text-sm font-semibold rounded-2xl hover:border-violet-300 hover:text-violet-600 transition-all"
@@ -245,13 +246,13 @@ export default function ServicesClient() {
             Free quotes. No obligation. We cover all Melbourne suburbs.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              href="/contact"
+            <button
+              onClick={() => setQuoteOpen(true)}
               className="flex items-center justify-center gap-2 px-8 py-4 bg-violet-600 text-white font-bold rounded-2xl text-sm shadow-violet hover:bg-violet-700 transition-colors"
             >
               <FileText className="w-4 h-4" />
               Get a Free Quote
-            </Link>
+            </button>
             <a
               href="tel:0433240617"
               className="flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white font-semibold rounded-2xl text-sm hover:border-white/50 transition-colors"
@@ -262,6 +263,8 @@ export default function ServicesClient() {
           </div>
         </div>
       </section>
+
+      <QuoteChat isOpen={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </>
   );
 }
