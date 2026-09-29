@@ -26,7 +26,7 @@ export default function Navbar() {
       {/* ── Desktop bar ── */}
       <div className="hidden md:flex max-w-7xl mx-auto px-3 py-2.5 items-center justify-between">
         <Link href="/" className="flex items-center shrink-0">
-          <Image src="/logo.png" alt="Turf Clean Pros" width={120} height={36} className="h-9 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="Turf Clean Pros" width={160} height={48} className="h-12 w-auto object-contain" priority />
         </Link>
         <div className="flex items-center gap-8">
           {links.map((l) => (
@@ -47,7 +47,7 @@ export default function Navbar() {
 
         {/* Center: logo */}
         <Link href="/" className="flex-1 flex items-center justify-center">
-          <Image src="/logo.png" alt="Turf Clean Pros" width={90} height={30} className="h-8 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="Turf Clean Pros" width={120} height={40} className="h-10 w-auto object-contain" priority />
         </Link>
 
         {/* Right: phone only */}
