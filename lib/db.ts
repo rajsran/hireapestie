@@ -94,6 +94,16 @@ async function _runMigrations(): Promise<void> {
     sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_urls TEXT`,
     sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS notes TEXT`,
   ]);
+
+  // Indexes — all idempotent, all in parallel
+  await Promise.all([
+    sql`CREATE INDEX IF NOT EXISTS idx_quotes_customer_id  ON quotes(customer_id)`,
+    sql`CREATE INDEX IF NOT EXISTS idx_quotes_created_at   ON quotes(created_at DESC)`,
+    sql`CREATE INDEX IF NOT EXISTS idx_invoices_customer_id ON invoices(customer_id)`,
+    sql`CREATE INDEX IF NOT EXISTS idx_invoices_quote_id   ON invoices(quote_id)`,
+    sql`CREATE INDEX IF NOT EXISTS idx_invoices_created_at ON invoices(created_at DESC)`,
+    sql`CREATE INDEX IF NOT EXISTS idx_customers_created_at ON customers(created_at DESC)`,
+  ]);
 }
 
 export interface DbCustomer {

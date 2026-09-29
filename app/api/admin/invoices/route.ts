@@ -60,18 +60,16 @@ export async function POST(req: NextRequest) {
       if (!name?.trim() || !email?.trim()) {
         return NextResponse.json({ error: "New customer requires name and email" }, { status: 400 });
       }
-      // Reuse existing customer with same email if found
-      const existing = await sql`SELECT id FROM customers WHERE email = ${email.trim()} LIMIT 1`;
-      if (existing.length > 0) {
-        customerId = existing[0].id as string;
-      } else {
-        const custId = `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-        await sql`
-          INSERT INTO customers (id, name, email, phone, suburb, postcode)
-          VALUES (${custId}, ${name.trim()}, ${email.trim()}, ${phone ?? null}, ${suburb ?? null}, ${postcode ?? null})
-        `;
-        customerId = custId;
-      }
+      // Single upsert — reuses existing customer if email matches
+      const custId = `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const [row] = await sql`
+        INSERT INTO customers (id, name, email, phone, suburb, postcode)
+        VALUES (${custId}, ${name.trim()}, ${email.trim()}, ${phone ?? null}, ${suburb ?? null}, ${postcode ?? null})
+        ON CONFLICT (email) DO UPDATE SET
+          name = COALESCE(EXCLUDED.name, customers.name)
+        RETURNING id
+      `;
+      customerId = row.id as string;
     }
 
     if (!customerId) {

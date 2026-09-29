@@ -43,30 +43,24 @@ async function upsertCustomerAndQuote(
     await initDb();
     const sql = getDb();
 
+    const newId = `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     let customerId: string;
+
     if (lead.email) {
-      const existing = await sql`
-        SELECT id FROM customers WHERE email = ${lead.email} LIMIT 1
+      // Single upsert — no SELECT round-trip needed
+      const [row] = await sql`
+        INSERT INTO customers (id, name, email, phone, suburb, postcode)
+        VALUES (${newId}, ${lead.name ?? null}, ${lead.email}, ${lead.phone ?? null}, ${lead.suburb ?? null}, ${lead.postcode ?? null})
+        ON CONFLICT (email) DO UPDATE SET
+          name     = COALESCE(EXCLUDED.name,     customers.name),
+          phone    = COALESCE(EXCLUDED.phone,    customers.phone),
+          suburb   = COALESCE(EXCLUDED.suburb,   customers.suburb),
+          postcode = COALESCE(EXCLUDED.postcode, customers.postcode)
+        RETURNING id
       `;
-      if (existing.length > 0) {
-        customerId = existing[0].id as string;
-        await sql`
-          UPDATE customers SET
-            name     = COALESCE(${lead.name ?? null}, name),
-            phone    = COALESCE(${lead.phone ?? null}, phone),
-            suburb   = COALESCE(${lead.suburb ?? null}, suburb),
-            postcode = COALESCE(${lead.postcode ?? null}, postcode)
-          WHERE id = ${customerId}
-        `;
-      } else {
-        customerId = `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-        await sql`
-          INSERT INTO customers (id, name, email, phone, suburb, postcode)
-          VALUES (${customerId}, ${lead.name ?? null}, ${lead.email}, ${lead.phone ?? null}, ${lead.suburb ?? null}, ${lead.postcode ?? null})
-        `;
-      }
+      customerId = row.id as string;
     } else {
-      customerId = `cust-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      customerId = newId;
       await sql`
         INSERT INTO customers (id, name, email, phone, suburb, postcode)
         VALUES (${customerId}, ${lead.name ?? null}, NULL, ${lead.phone ?? null}, ${lead.suburb ?? null}, ${lead.postcode ?? null})

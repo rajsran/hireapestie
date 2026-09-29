@@ -67,36 +67,33 @@ export async function POST(req: NextRequest) {
       console.error("[send-quote] PDF upload failed:", err);
     }
 
-    // Email is best-effort — a bad/suppressed address should never block the quote from being sent
+    // Email, DB save, and SMS all run in parallel — none depend on each other
     let emailFailed = false;
-    if (lead.email) {
-      try {
-        await sendFinalQuoteEmail(updatedLead, pdfBuffer, finalAmount, leadId);
-      } catch (err) {
-        console.error("[send-quote] Email failed (non-fatal):", err);
-        emailFailed = true;
-      }
-    }
+    const firstName = (lead.name ?? "").split(" ")[0] || "there";
 
-    await saveLead({ ...updatedLead, shortId, pdfUrl, finalQuote: finalAmount, quoteSentAt: new Date().toISOString() });
+    await Promise.all([
+      lead.email
+        ? sendFinalQuoteEmail(updatedLead, pdfBuffer, finalAmount, leadId)
+            .catch(err => { console.error("[send-quote] Email failed (non-fatal):", err); emailFailed = true; })
+        : null,
 
-    if (lead.phone) {
-      const firstName = (lead.name ?? "").split(" ")[0] || "there";
-      const quoteLink = pdfUrl ? await shortenUrl(`${siteUrl}/q/${shortId}`) : "";
-      const linkText = quoteLink ? ` View your quote: ${quoteLink}` : "";
-      let bookingText = "";
-      if (bookingDate) {
-        const d = new Date(bookingDate + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" });
-        const t = bookingTime ? ` at ${bookingTime}` : "";
-        bookingText = ` Your booking is confirmed for ${d}${t}.`;
-      }
-      const smsBody = `Hi ${firstName}, your Turf Clean Pros quote is $${finalAmount}.${bookingText}${linkText} Reply Y to accept or N to decline. Questions? Call us anytime!`;
-      try {
-        await sendSms(normalisePhone(lead.phone), smsBody);
-      } catch (err) {
-        console.error("[send-quote] SMS failed:", err);
-      }
-    }
+      saveLead({ ...updatedLead, shortId, pdfUrl, finalQuote: finalAmount, quoteSentAt: new Date().toISOString() }),
+
+      lead.phone
+        ? (async () => {
+            const quoteLink = pdfUrl ? await shortenUrl(`${siteUrl}/q/${shortId}`) : "";
+            const linkText = quoteLink ? ` View your quote: ${quoteLink}` : "";
+            let bookingText = "";
+            if (bookingDate) {
+              const d = new Date(bookingDate + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" });
+              const t = bookingTime ? ` at ${bookingTime}` : "";
+              bookingText = ` Your booking is confirmed for ${d}${t}.`;
+            }
+            const smsBody = `Hi ${firstName}, your Turf Clean Pros quote is $${finalAmount}.${bookingText}${linkText} Reply Y to accept or N to decline. Questions? Call us anytime!`;
+            await sendSms(normalisePhone(lead.phone!), smsBody);
+          })().catch(err => console.error("[send-quote] SMS failed:", err))
+        : null,
+    ]);
 
     return NextResponse.json({ ok: true, emailFailed });
   } catch (err) {
