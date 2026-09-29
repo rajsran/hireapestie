@@ -21,7 +21,7 @@ const services = [
       "Residential & commercial turf",
     ],
     pricing: "From $150 (up to ~25m²) · $6–8/m² for larger areas",
-    image: "/service.jpeg",
+    image: "/SyntheticTurf%20DeepClean.jpeg",
   },
   {
     id: "pet-odour-stain-treatment",
@@ -38,7 +38,7 @@ const services = [
       "Fast-drying formula",
     ],
     pricing: "$60–100 as add-on · $120–160 standalone",
-    image: "/service.jpeg",
+    image: "/PetOdour%26StainTreatment.jpg",
   },
   {
     id: "moss-algae-removal",
@@ -55,7 +55,7 @@ const services = [
       "Prevents regrowth for longer",
     ],
     pricing: "$80–150 as add-on or standalone",
-    image: "/service.jpeg",
+    image: "/Moss%26AlgaeRemoval.jpg",
   },
   {
     id: "debris-leaf-clearing",
@@ -72,7 +72,7 @@ const services = [
       "Residential & commercial",
     ],
     pricing: "$60–100",
-    image: "/service.jpeg",
+    image: "/Debris%20%26%20Leaf%20Clearing.jpg",
   },
   {
     id: "scheduled-maintenance-plans",
