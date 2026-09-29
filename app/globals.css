@@ -64,3 +64,23 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;              /* Chrome / Safari / Opera */
 }
+
+/* Quote wizard range slider thumb */
+.wizard-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1A6B3C;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(26, 107, 60, 0.4);
+  cursor: pointer;
+}
+.wizard-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1A6B3C;
+  border: 3px solid white;
+  cursor: pointer;
+}

@@ -1,625 +1,523 @@
 "use client";
 
-declare const fbq: ((...args: unknown[]) => void) | undefined;
+import { useState, useRef } from "react";
+import { X, ChevronLeft, CheckCircle2, Loader2, Phone, Camera } from "lucide-react";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  X, Sparkles, Heart, Leaf, Wind, CalendarCheck,
-  ChevronRight, ChevronLeft, Phone, CheckCircle2, Loader2,
-  MessageCircle, User, Maximize2,
-} from "lucide-react";
+// ─── CONFIG — edit prices, rates and webhook here ────────────────────────────
+const CONFIG = {
+  webhookUrl: "",          // Formspree / Make / Zapier URL; leave "" for /api/quote/submit
+  phone:      "0433 240 617",
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type Step = "contact" | "service" | "turfsize" | "addontype" | "quote";
+  services: [
+    { id: "deep-clean",  emoji: "🌿", name: "Synthetic Turf Deep Clean",   sub: "Full brush, groom & vacuum clean · add-ons available", from: "From $199", base: 199, rate: 7, hasAddons: true  },
+    { id: "pet-odour",   emoji: "🐾", name: "Pet Odour & Stain Treatment", sub: "Enzyme treatment for pet odours",                       from: "From $99",  base: 99,  rate: 3                  },
+    { id: "moss-algae",  emoji: "🍃", name: "Moss & Algae Removal",        sub: "Bio-safe treatment for slippery turf",                  from: "From $89",  base: 89,  rate: 4                  },
+    { id: "debris",      emoji: "🍂", name: "Debris & Leaf Clearing",      sub: "Surface clear & drainage refresh",                     from: "From $69",  base: 69,  rate: 2                  },
+    { id: "maintenance", emoji: "🔁", name: "Scheduled Maintenance Plan",  sub: "10–15% off · quarterly visits",                        from: "From $179/visit", isMaintenance: true           },
+  ] as Service[],
 
-interface Answers {
-  service?: string;
-  turfSize?: string;
-  serviceDetail?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  postcode?: string;
-  suburb?: string;
-}
+  addons: [
+    { id: "pet-odour",  emoji: "🐾", name: "Pet Odour & Stain Treatment", sub: "Enzyme treatment for pet odours",      base: 99, rate: 3 },
+    { id: "moss-algae", emoji: "🍃", name: "Moss & Algae Removal",        sub: "Bio-safe treatment for slippery turf", base: 89, rate: 4 },
+    { id: "infill",     emoji: "🏝️", name: "Infill Top-Up",               sub: "Kiln-dried sand top-up · ~2kg/m²",     base: 89, rate: 4 },
+  ],
 
-export interface QuoteChatProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-// ─── Step Options ─────────────────────────────────────────────────────────────
-const SERVICE_OPTIONS = [
-  { label: "Synthetic Turf Deep Clean",    Icon: Sparkles,      desc: "Deep clean from $150 · all turf types" },
-  { label: "Pet Odour & Stain Treatment",  Icon: Heart,         desc: "Enzyme treatment · $60–160" },
-  { label: "Moss & Algae Removal",         Icon: Leaf,          desc: "Bio-safe removal · $80–150" },
-  { label: "Debris & Leaf Clearing",       Icon: Wind,          desc: "Quick surface clear · $60–100" },
-  { label: "Scheduled Maintenance Plans",  Icon: CalendarCheck, desc: "10–15% off · quarterly visits" },
-];
-
-const TURF_SIZE_OPTIONS = [
-  { label: "Up to 25m²",  low: 150, high: 150, desc: "Small yard or balcony turf" },
-  { label: "25–50m²",     low: 300, high: 400, desc: "Medium backyard turf" },
-  { label: "50–100m²",    low: 500, high: 800, desc: "Large backyard or side area" },
-  { label: "100m²+",      low: 0,   high: 0,   desc: "Large commercial or estate — custom quote" },
-];
-
-const ADDON_OPTIONS = [
-  { label: "Add-on",    desc: "Adding to a Turf Deep Clean booking" },
-  { label: "Standalone", desc: "As a separate standalone service" },
-];
-
-function getNextStep(service: string): Step {
-  if (service === "Synthetic Turf Deep Clean") return "turfsize";
-  if (service === "Pet Odour & Stain Treatment") return "addontype";
-  if (service === "Moss & Algae Removal") return "addontype";
-  return "quote";
-}
-
-const PREV_STEP: Partial<Record<Step, Step>> = {
-  service:   "contact",
-  turfsize:  "service",
-  addontype: "service",
+  maintenanceDiscount: { quarterly: 0.10, annual: 0.15 } as Record<string, number>,
+  addonOff:    0.40,
+  sliderMin:   25,
+  sliderMax:   200,
+  sliderStep:  5,
+  customAt:    100,
 };
 
-// ─── Pricing helpers ──────────────────────────────────────────────────────────
-function getAddonPricing(service: string, detail: string): { low: number; high: number } {
-  if (service === "Pet Odour & Stain Treatment") {
-    return detail === "Add-on" ? { low: 60, high: 100 } : { low: 120, high: 160 };
-  }
-  if (service === "Moss & Algae Removal") {
-    return detail === "Add-on" ? { low: 80, high: 120 } : { low: 100, high: 150 };
-  }
-  return { low: 60, high: 100 };
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface Service {
+  id: string; emoji: string; name: string; sub: string; from: string;
+  base?: number; rate?: number; hasAddons?: boolean; isMaintenance?: boolean;
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+interface St {
+  step: number;
+  serviceId: string;
+  area: number;
+  addons: string[];
+  billing: "quarterly" | "annual";
+  name: string; phone: string; suburb: string;
+  photo: File | null; photoName: string; notes: string;
+}
+
+const INIT: St = {
+  step: 0, serviceId: "", area: CONFIG.sliderMin, addons: [], billing: "quarterly",
+  name: "", phone: "", suburb: "", photo: null, photoName: "", notes: "",
+};
+
+export interface QuoteChatProps { isOpen: boolean; onClose: () => void; }
+
+// ─── Pricing helpers ──────────────────────────────────────────────────────────
+function svcPrice(id: string, area: number): number | null {
+  const s = CONFIG.services.find(x => x.id === id);
+  if (!s || s.isMaintenance || s.base === undefined || s.rate === undefined) return null;
+  return Math.round(s.base + s.rate * (area - CONFIG.sliderMin));
+}
+function addonFull(id: string, area: number) {
+  const a = CONFIG.addons.find(x => x.id === id)!;
+  return Math.round(a.base + a.rate * (area - CONFIG.sliderMin));
+}
+function addonBundled(id: string, area: number) {
+  return Math.round(addonFull(id, area) * (1 - CONFIG.addonOff));
+}
+function maintPrice(area: number, billing: string) {
+  return Math.round((svcPrice("deep-clean", area) ?? 0) * (1 - CONFIG.maintenanceDiscount[billing]));
+}
+function total(st: St): number | null {
+  if (st.area > CONFIG.customAt) return null;
+  const s = CONFIG.services.find(x => x.id === st.serviceId);
+  if (!s) return null;
+  if (s.isMaintenance) return maintPrice(st.area, st.billing);
+  let t = svcPrice(st.serviceId, st.area) ?? 0;
+  if (s.hasAddons) for (const id of st.addons) t += addonBundled(id, st.area);
+  return t;
+}
+const fmt = (n: number) => "$" + n.toLocaleString("en-AU");
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
-  const [step, setStep]       = useState<Step>("contact");
-  const [answers, setAnswers] = useState<Answers>({});
-  const [contactName,     setContactName]     = useState("");
-  const [contactPhone,    setContactPhone]    = useState("");
-  const [contactEmail,    setContactEmail]    = useState("");
-  const [contactPostcode, setContactPostcode] = useState("");
-  const [contactSuburb,   setContactSuburb]   = useState("");
-  const [suburbs,         setSuburbs]         = useState<string[]>([]);
-  const [suburbLoading,   setSuburbLoading]   = useState(false);
-  const [isLoading,       setIsLoading]       = useState(false);
-  const [quoteEstimate,   setQuoteEstimate]   = useState<{ low: number; high: number; note?: string } | null>(null);
-  const [submittedRef]                        = useState({ value: false });
+  const [st, setSt]           = useState<St>(INIT);
+  const [errs, setErrs]       = useState({ name: false, phone: false, suburb: false });
+  const [submitting, setSub]  = useState(false);
+  const scrollRef             = useRef<HTMLDivElement>(null);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setStep("contact");
-      setAnswers({});
-      setContactName("");
-      setContactPhone("");
-      setContactEmail("");
-      setContactPostcode("");
-      setContactSuburb("");
-      setSuburbs([]);
-      setIsLoading(false);
-      setQuoteEstimate(null);
-      submittedRef.value = false;
-    }
-  }, [isOpen, submittedRef]);
-
-  // Fetch suburbs when postcode hits 4 digits
-  useEffect(() => {
-    if (contactPostcode.length !== 4) {
-      setSuburbs([]);
-      setContactSuburb("");
-      return;
-    }
-    let cancelled = false;
-    setSuburbLoading(true);
-    fetch(`/api/suburb?postcode=${contactPostcode}`)
-      .then(r => r.json())
-      .then(data => {
-        if (cancelled) return;
-        const list: string[] = data.suburbs ?? [];
-        setSuburbs(list);
-        if (list.length === 1) setContactSuburb(list[0]);
-      })
-      .catch(() => { if (!cancelled) setSuburbs([]); })
-      .finally(() => { if (!cancelled) setSuburbLoading(false); });
-    return () => { cancelled = true; };
-  }, [contactPostcode]);
-
-  const scrollTop = () =>
-    setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 60);
-
-  const advance = (update: Partial<Answers>, nextStep: Step) => {
-    setAnswers(prev => ({ ...prev, ...update }));
-    setStep(nextStep);
-    scrollTop();
-  };
-
-  const goBack = () => {
-    const prev = PREV_STEP[step];
-    if (prev) { setStep(prev); scrollTop(); }
-  };
-
-  const submitContact = () => {
-    const contactData = {
-      name:     contactName.trim()     || "Not provided",
-      phone:    contactPhone.trim()    || "Not provided",
-      email:    contactEmail.trim()    || undefined,
-      postcode: contactPostcode.trim() || undefined,
-      suburb:   contactSuburb.trim()   || undefined,
-    };
-    setAnswers(prev => ({ ...prev, ...contactData }));
-    setStep("service");
-    scrollTop();
-
-    fetch("/api/quote/early-lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contactData),
-    }).catch(() => {});
-  };
-
-  const finishQuote = async (final: Answers) => {
-    setStep("quote");
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/quote/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(final),
-      });
-      const data = await res.json();
-      if (data.estimate) setQuoteEstimate(data.estimate);
-      submittedRef.value = true;
-      if (typeof fbq !== "undefined") fbq("track", "Lead");
-    } catch {
-      // non-critical
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const STEP_ORDER: Step[] = ["contact", "service", "turfsize", "quote"];
-  const currentIndex = STEP_ORDER.indexOf(step);
-  const progress = Math.round((currentIndex / (STEP_ORDER.length - 1)) * 100);
-  const firstName = contactName.split(" ")[0] || answers.name?.split(" ")[0] || "";
+  const up  = (patch: Partial<St>) => setSt(prev => ({ ...prev, ...patch }));
+  const stl = () => setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 60);
+  const go  = (step: number) => { up({ step }); stl(); };
+  const reset = () => { setSt(INIT); setErrs({ name: false, phone: false, suburb: false }); setSub(false); };
 
   if (!isOpen) return null;
+
+  const svc      = CONFIG.services.find(s => s.id === st.serviceId);
+  const isCustom = st.area > CONFIG.customAt;
+  const ttl      = total(st);
+  const sliderPct = ((st.area - CONFIG.sliderMin) / (CONFIG.sliderMax - CONFIG.sliderMin)) * 100;
+  const sliderBg  = `linear-gradient(to right,#1A6B3C ${sliderPct}%,#E5E7EB ${sliderPct}%)`;
+
+  const validateAndContinue = () => {
+    const e = { name: !st.name.trim(), phone: !st.phone.trim(), suburb: !st.suburb.trim() };
+    setErrs(e);
+    if (!e.name && !e.phone && !e.suburb) go(4);
+  };
+
+  const handleSubmit = async () => {
+    setSub(true);
+    const body = {
+      service: svc?.name, area: st.area + "m²",
+      addons: st.addons.map(id => CONFIG.addons.find(a => a.id === id)?.name),
+      billing: svc?.isMaintenance ? st.billing : undefined,
+      estimatedPrice: isCustom ? "Custom quote" : ttl ? fmt(ttl) : undefined,
+      name: st.name, phone: st.phone, suburb: st.suburb,
+      notes: st.notes || undefined,
+    };
+    try {
+      if (CONFIG.webhookUrl) {
+        const fd = new FormData();
+        fd.append("data", JSON.stringify(body));
+        if (st.photo) fd.append("photo", st.photo, st.photo.name);
+        await fetch(CONFIG.webhookUrl, { method: "POST", body: fd });
+      } else {
+        await fetch("/api/quote/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+    } catch { /* non-critical */ }
+    setSub(false);
+    go(5);
+  };
 
   return (
     <>
       {/* Backdrop */}
       <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal panel */}
+      {/* Modal */}
       <div className="fixed inset-0 z-50 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[420px]">
-        <div className="bg-white h-full md:rounded-3xl md:h-[680px] shadow-2xl flex flex-col overflow-hidden">
+        <div className="relative bg-white h-full md:rounded-3xl md:h-[700px] shadow-2xl flex flex-col overflow-hidden">
 
-          {/* ── Header ── */}
-          <div className="bg-ink-900 px-5 pt-4 pb-3 shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                {step !== "service" && step !== "quote" && (
-                  <button
-                    onClick={goBack}
-                    className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors shrink-0"
-                    aria-label="Go back"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-white" />
-                  </button>
-                )}
-                <div className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
-                  <MessageCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm leading-tight">Get a Quote in Minutes</p>
-                  <p className="text-white/50 text-[11px]">Turf Clean Pros · All Melbourne</p>
-                </div>
+          {/* ── Header (steps 1–4) ── */}
+          {st.step >= 1 && st.step <= 4 && (
+            <div className="bg-ink-900 px-5 pt-4 pb-3 shrink-0">
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  onClick={() => go(st.step - 1)}
+                  aria-label="Go back"
+                  className={`w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors ${st.step === 1 ? "invisible pointer-events-none" : ""}`}
+                >
+                  <ChevronLeft className="w-4 h-4 text-white" />
+                </button>
+                <span className="text-white/60 text-xs font-semibold tracking-wide">Step {st.step} of 4</span>
+                <button onClick={onClose} aria-label="Close" className="text-white/50 hover:text-white p-1 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button onClick={onClose} className="text-white/50 hover:text-white p-1 transition-colors" aria-label="Close">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {step !== "quote" && (
               <div className="w-full bg-white/10 rounded-full h-1.5">
                 <div
                   className="bg-violet-400 h-1.5 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${(st.step / 4) * 100}%` }}
                 />
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* ── Scrollable body ── */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 bg-gray-50 space-y-2.5">
+          <div
+            ref={scrollRef}
+            className={`flex-1 overflow-y-auto ${st.step >= 1 && st.step <= 4 ? "bg-gray-50" : "bg-white"}`}
+          >
 
-            {/* ══ CONTACT ══ */}
-            {step === "contact" && (
-              <StepShell
-                q="Let's get started!"
-                sub="Enter your details and we'll give you a price in seconds"
-                icon={<User className="w-4 h-4 text-violet-600" />}
-              >
-                <div className="flex flex-col gap-2">
-                  <input
-                    type="text"
-                    value={contactName}
-                    onChange={e => setContactName(e.target.value)}
-                    placeholder="Full name"
-                    className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
-                  />
-                  <input
-                    type="tel"
-                    value={contactPhone}
-                    onChange={e => setContactPhone(e.target.value)}
-                    placeholder="Phone number (e.g. 0412 345 678)"
-                    className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
-                  />
-                  <input
-                    type="email"
-                    value={contactEmail}
-                    onChange={e => setContactEmail(e.target.value)}
-                    placeholder="Email address"
-                    className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
-                  />
-                  <div className="relative">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={contactPostcode}
-                      onChange={e => {
-                        setContactSuburb("");
-                        setContactPostcode(e.target.value.replace(/\D/g, "").slice(0, 4));
-                      }}
-                      placeholder="Postcode (e.g. 3000)"
-                      className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-base text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all"
-                    />
-                    {suburbLoading && (
-                      <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400 animate-spin" />
-                    )}
+            {/* ══ STEP 0: Intro ══ */}
+            {st.step === 0 && (
+              <div className="flex flex-col h-full">
+                <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 z-10 text-ink-300 hover:text-ink-600 p-1 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-5">
+                    <span className="text-2xl">🌿</span>
                   </div>
-                  {suburbs.length > 1 && (
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-[11px] text-ink-400 px-1">Select your suburb</p>
-                      <div className="flex flex-wrap gap-2">
-                        {suburbs.map(s => (
-                          <button
-                            key={s}
-                            type="button"
-                            onClick={() => setContactSuburb(s)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                              contactSuburb === s
-                                ? "bg-violet-600 text-white border-violet-600"
-                                : "bg-white text-ink-700 border-gray-200 hover:border-violet-400"
-                            }`}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {suburbs.length === 1 && (
-                    <p className="text-xs text-violet-600 font-semibold px-1">📍 {suburbs[0]}</p>
-                  )}
+                  <p className="text-violet-600 text-[11px] font-bold tracking-widest uppercase mb-3">TurfCleanPros</p>
+                  <h2 className="font-display font-black text-[1.6rem] text-ink-900 leading-tight mb-3">
+                    Ready to book<br />your clean?
+                  </h2>
+                  <p className="text-ink-400 text-sm leading-relaxed max-w-xs">
+                    Tap below to get an instant price estimate — pick your service, tell us the area, and we&apos;ll call you to confirm.
+                  </p>
+                </div>
+                <div className="px-5 pb-8 pt-3 border-t border-gray-100 shrink-0">
                   <button
-                    onClick={submitContact}
-                    disabled={!contactName.trim() || !contactPhone.trim()}
-                    className="w-full py-3.5 bg-violet-600 text-white font-bold rounded-2xl text-sm hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-1"
+                    onClick={() => go(1)}
+                    className="btn-pulse w-full py-4 bg-gradient-to-b from-violet-500 to-violet-700 text-white font-bold rounded-2xl text-base hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all shadow-violet"
                   >
-                    Get My Quote <ChevronRight className="w-4 h-4" />
+                    Get a Quote
                   </button>
                 </div>
-              </StepShell>
+              </div>
             )}
 
-            {/* ══ SERVICE ══ */}
-            {step === "service" && (
-              <StepShell
-                q="What service do you need?"
-                sub="Tap an option — we'll price it up instantly ⚡"
-              >
-                {SERVICE_OPTIONS.map(({ label, Icon, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={desc}
-                    icon={<Icon className="w-5 h-5 text-violet-600" />}
-                    onClick={() => {
-                      const next = getNextStep(label);
-                      if (next === "quote") {
-                        const final = { ...answers, service: label };
-                        setAnswers(final);
-                        finishQuote(final);
-                      } else {
-                        advance({ service: label }, next);
-                      }
-                    }}
-                  />
-                ))}
-              </StepShell>
-            )}
-
-            {/* ══ TURF SIZE ══ */}
-            {step === "turfsize" && (
-              <StepShell
-                q="What's the approximate size of your turf?"
-                sub="Pick the closest range — we'll confirm the exact m² on-site"
-                icon={<Maximize2 className="w-4 h-4 text-violet-600" />}
-              >
-                {TURF_SIZE_OPTIONS.map(({ label, low, high, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={
-                      label === "100m²+"
-                        ? desc
-                        : `$${low === high ? low : `${low}–${high}`} · ${desc}`
-                    }
-                    onClick={() => {
-                      const final = { ...answers, turfSize: label };
-                      setAnswers(final);
-                      finishQuote(final);
-                    }}
-                  />
-                ))}
-              </StepShell>
-            )}
-
-            {/* ══ ADD-ON TYPE ══ */}
-            {step === "addontype" && (
-              <StepShell
-                q="Will this be an add-on or standalone?"
-                sub="Add-ons are discounted when booked with a deep clean"
-              >
-                {ADDON_OPTIONS.map(({ label, desc }) => (
-                  <OptionBtn
-                    key={label}
-                    label={label}
-                    desc={desc}
-                    onClick={() => {
-                      const final = { ...answers, serviceDetail: label };
-                      setAnswers(final);
-                      finishQuote(final);
-                    }}
-                  />
-                ))}
-              </StepShell>
-            )}
-
-            {/* ══ QUOTE RESULT ══ */}
-            {step === "quote" && (
-              <div className="flex flex-col gap-3 pb-2">
-                {isLoading ? (
-                  <div className="flex flex-col items-center justify-center py-10 px-4 gap-6">
-                    <div className="relative flex items-center justify-center">
-                      <span className="absolute w-24 h-24 rounded-full bg-violet-100 animate-ping opacity-40" />
-                      <span className="absolute w-16 h-16 rounded-full bg-violet-200 animate-ping opacity-50" style={{ animationDelay: "0.15s" }} />
-                      <div className="relative w-14 h-14 rounded-full bg-violet-600 flex items-center justify-center shadow-lg">
-                        <Loader2 className="w-7 h-7 text-white animate-spin" />
+            {/* ══ STEP 1: Service ══ */}
+            {st.step === 1 && (
+              <div className="px-4 pt-5 pb-6">
+                <h3 className="font-display font-black text-[1.2rem] text-ink-900 mb-1">What service do you need?</h3>
+                <p className="text-ink-400 text-xs mb-4">Tap an option — we&apos;ll price it up instantly ⚡</p>
+                <div className="flex flex-col gap-2">
+                  {CONFIG.services.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => { up({ serviceId: s.id, addons: [] }); go(2); }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-left hover:border-violet-400 hover:bg-violet-50 active:scale-[0.98] transition-all shadow-sm group"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0 text-lg group-hover:bg-violet-100 transition-colors">
+                        {s.emoji}
                       </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="font-bold text-ink-900 text-lg mb-1">Preparing your quote…</p>
-                      <p className="text-ink-400 text-sm">This only takes a moment</p>
-                    </div>
-                    <div className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
-                      {[
-                        { label: "Reviewing your property details", delay: "0s" },
-                        { label: "Matching your service requirements", delay: "0.4s" },
-                        { label: "Preparing your personalised quote", delay: "0.8s" },
-                      ].map(({ label, delay }) => (
-                        <div key={label} className="flex items-center gap-3">
-                          <div className="w-4 h-4 rounded-full bg-violet-500 animate-pulse shrink-0" style={{ animationDelay: delay }} />
-                          <p className="text-ink-500 text-sm">{label}</p>
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-ink-900 text-sm leading-tight">{s.name}</p>
+                        <p className="text-ink-400 text-[11px] mt-0.5 leading-tight">{s.sub}</p>
+                      </div>
+                      <span className="text-violet-600 font-bold text-xs whitespace-nowrap">{s.from}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ══ STEP 2: Area + Pricing ══ */}
+            {st.step === 2 && svc && (
+              <div className="px-4 pt-5 pb-4 space-y-4">
+                <div>
+                  <h3 className="font-display font-black text-[1.2rem] text-ink-900 mb-1">How big is the area?</h3>
+                  <p className="text-ink-400 text-xs">{svc.name}</p>
+                </div>
+
+                {/* Area card */}
+                <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5">
+                  <div className="text-center mb-5">
+                    <span className="font-display font-black text-5xl text-violet-600">{st.area}</span>
+                    <span className="font-bold text-ink-400 text-lg ml-1.5">m²</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={CONFIG.sliderMin}
+                    max={CONFIG.sliderMax}
+                    step={CONFIG.sliderStep}
+                    value={st.area}
+                    onChange={e => up({ area: +e.target.value })}
+                    aria-label="Area in square metres"
+                    className="wizard-slider w-full h-2 rounded-full outline-none cursor-pointer appearance-none"
+                    style={{ background: sliderBg }}
+                  />
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[11px] text-ink-300 font-medium">25m² min</span>
+                    <span className="text-[11px] text-ink-300 font-medium">200m²</span>
+                  </div>
+                </div>
+
+                {/* Maintenance: billing toggle */}
+                {svc.isMaintenance && (
+                  <div>
+                    <p className="text-xs font-semibold text-ink-500 mb-2">Billing</p>
+                    <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+                      {(["quarterly", "annual"] as const).map(p => (
+                        <button
+                          key={p}
+                          onClick={() => up({ billing: p })}
+                          className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition-all ${st.billing === p ? "bg-white text-violet-700 shadow-sm" : "text-ink-400 hover:text-ink-600"}`}
+                        >
+                          {p === "quarterly" ? "Quarterly · 10% off" : "Prepaid annual · 15% off"}
+                        </button>
                       ))}
                     </div>
                   </div>
-                ) : (
-                  <>
-                    <div className="bg-gradient-to-br from-violet-600 to-violet-700 rounded-2xl p-5 text-center text-white">
-                      <CheckCircle2 className="w-10 h-10 text-violet-300 mx-auto mb-2" />
-                      <p className="font-black text-lg leading-tight">
-                        {firstName ? `Thanks, ${firstName}!` : "Thanks!"}
-                      </p>
-                      <p className="text-violet-300 text-xs mt-1">We&apos;ve received your enquiry</p>
-                    </div>
-
-                    {/* Price estimate */}
-                    {(() => {
-                      const service = answers.service ?? "";
-
-                      if (service === "Scheduled Maintenance Plans") {
-                        return (
-                          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
-                            <p className="text-violet-700 font-bold text-sm mb-1">Pricing discussed over the phone</p>
-                            <p className="text-violet-500 text-xs leading-relaxed">Maintenance plans are tailored to your turf — our team will call you to discuss frequency, inclusions and your discounted rate (10–15% off).</p>
-                          </div>
-                        );
-                      }
-
-                      if (service === "Synthetic Turf Deep Clean" && answers.turfSize === "100m²+") {
-                        return (
-                          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
-                            <p className="text-violet-700 font-bold text-sm mb-1">Custom quote for large areas</p>
-                            <p className="text-violet-500 text-xs leading-relaxed">For turf over 100m² we&apos;ll measure and provide a fixed price — our team will be in touch shortly.</p>
-                          </div>
-                        );
-                      }
-
-                      if (service === "Synthetic Turf Deep Clean" && answers.turfSize) {
-                        const opt = TURF_SIZE_OPTIONS.find(o => o.label === answers.turfSize);
-                        if (opt && opt.low > 0) {
-                          return (
-                            <div className="bg-ink-900 rounded-2xl p-5 text-center">
-                              <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
-                              <p className="text-white font-black text-3xl">
-                                {opt.low === opt.high ? `$${opt.low}` : `$${opt.low} – $${opt.high}`}
-                              </p>
-                              <p className="text-white/40 text-xs mt-1">{answers.turfSize} · Final confirmed on-site</p>
-                            </div>
-                          );
-                        }
-                      }
-
-                      if ((service === "Pet Odour & Stain Treatment" || service === "Moss & Algae Removal") && answers.serviceDetail) {
-                        const { low, high } = getAddonPricing(service, answers.serviceDetail);
-                        return (
-                          <div className="bg-ink-900 rounded-2xl p-5 text-center">
-                            <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
-                            <p className="text-white font-black text-3xl">${low} – ${high}</p>
-                            <p className="text-white/40 text-xs mt-1">{answers.serviceDetail} · Final confirmed on-site</p>
-                          </div>
-                        );
-                      }
-
-                      if (service === "Debris & Leaf Clearing") {
-                        return (
-                          <div className="bg-ink-900 rounded-2xl p-5 text-center">
-                            <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Price Estimate</p>
-                            <p className="text-white font-black text-3xl">$60 – $100</p>
-                            <p className="text-white/40 text-xs mt-1">Final price confirmed on-site</p>
-                          </div>
-                        );
-                      }
-
-                      if (quoteEstimate) {
-                        return (
-                          <div className="bg-ink-900 rounded-2xl p-5 text-center">
-                            <p className="text-white/50 text-[11px] uppercase tracking-widest mb-1">Starting Price</p>
-                            <p className="text-white font-black text-3xl">
-                              {quoteEstimate.low === quoteEstimate.high
-                                ? `$${quoteEstimate.low.toLocaleString()}`
-                                : `$${quoteEstimate.low.toLocaleString()} – $${quoteEstimate.high.toLocaleString()}`}
-                            </p>
-                            {quoteEstimate.note && <p className="text-white/40 text-xs mt-1">{quoteEstimate.note}</p>}
-                            <p className="text-white/30 text-[10px] mt-2">Final price confirmed on-site</p>
-                          </div>
-                        );
-                      }
-
-                      return null;
-                    })()}
-
-                    {/* Summary */}
-                    <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
-                      <p className="text-ink-400 text-[11px] uppercase tracking-widest font-semibold mb-1">Your selections</p>
-                      {[
-                        { label: "Service",     value: answers.service },
-                        { label: "Turf size",   value: answers.turfSize },
-                        { label: "Type",        value: answers.serviceDetail },
-                        { label: "Postcode",    value: answers.postcode ? `${answers.postcode}${answers.suburb ? ` · ${answers.suburb}` : ""}` : undefined },
-                      ].map(({ label, value }) => value && (
-                        <div key={label} className="flex items-center justify-between text-sm">
-                          <span className="text-ink-400">{label}</span>
-                          <span className="font-semibold text-ink-900">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="bg-ink-900 rounded-2xl p-5 text-center">
-                      <p className="text-white/50 text-xs mb-1 uppercase tracking-widest">Next Step</p>
-                      <p className="text-white font-bold text-lg">Free On-Site Inspection</p>
-                      <p className="text-white/40 text-xs mt-2">We&apos;ll visit, measure and give you a fixed accurate quote — no obligation.</p>
-                    </div>
-
-                    {answers.phone && answers.phone !== "Not provided" && (
-                      <div className="bg-violet-50 border border-violet-100 rounded-2xl p-4 text-center">
-                        <p className="text-violet-700 text-sm font-semibold">
-                          We&apos;ll call{firstName ? ` ${firstName}` : " you"} on
-                        </p>
-                        <p className="text-violet-900 font-black text-xl mt-0.5">{answers.phone}</p>
-                        <p className="text-violet-500 text-xs mt-1">within 24 hours · usually much sooner</p>
-                      </div>
-                    )}
-
-                    <a
-                      href="tel:0433240617"
-                      className="flex items-center justify-center gap-2.5 w-full py-4 bg-violet-600 text-white font-bold rounded-2xl text-sm hover:bg-violet-700 active:scale-[0.98] transition-all"
-                    >
-                      <Phone className="w-4 h-4" />
-                      Call Now: 0433 240 617
-                    </a>
-
-                    <button
-                      onClick={() => {
-                        setStep("contact");
-                        setAnswers({});
-                        setContactName("");
-                        setContactPhone("");
-                        setContactEmail("");
-                        setContactPostcode("");
-                        setContactSuburb("");
-                        setSuburbs([]);
-                        setIsLoading(false);
-                        setQuoteEstimate(null);
-                        submittedRef.value = false;
-                        scrollTop();
-                      }}
-                      className="w-full py-3 border border-gray-200 text-ink-500 text-sm font-medium rounded-2xl hover:bg-gray-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      Start a new quote
-                    </button>
-                  </>
                 )}
+
+                {/* Deep clean: add-ons */}
+                {svc.hasAddons && (
+                  <div>
+                    <p className="text-xs font-semibold text-ink-500 mb-2">
+                      Add extra treatments — 40% off when bundled with your Deep Clean
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {CONFIG.addons.map(addon => {
+                        const sel  = st.addons.includes(addon.id);
+                        const full = addonFull(addon.id, st.area);
+                        const bund = addonBundled(addon.id, st.area);
+                        return (
+                          <button
+                            key={addon.id}
+                            onClick={() => {
+                              const next = sel
+                                ? st.addons.filter(id => id !== addon.id)
+                                : [...st.addons, addon.id];
+                              up({ addons: next });
+                            }}
+                            aria-pressed={sel}
+                            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl border text-left transition-all active:scale-[0.98] ${sel ? "bg-violet-50 border-violet-400" : "bg-white border-gray-200 hover:border-violet-300"}`}
+                          >
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base transition-colors ${sel ? "bg-violet-600" : "bg-violet-50 border border-violet-100"}`}>
+                              {sel ? <span className="text-white font-bold text-sm">✓</span> : addon.emoji}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-ink-900 text-[13px] leading-tight">{addon.name}</p>
+                              <p className="text-ink-400 text-[11px] mt-0.5">{addon.sub}</p>
+                            </div>
+                            {isCustom ? (
+                              <span className="text-violet-600 font-bold text-xs shrink-0">Custom</span>
+                            ) : (
+                              <div className="text-right shrink-0">
+                                <p className="text-ink-300 text-[11px] line-through">{fmt(full)}</p>
+                                <p className="text-violet-600 font-bold text-[13px]">{fmt(bund)}</p>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Price panel */}
+                <div className="bg-ink-900 rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-white/50 text-[10px] uppercase tracking-widest leading-snug">
+                      {isCustom
+                        ? "Over 100m²"
+                        : svc.isMaintenance
+                          ? "Price per visit"
+                          : st.addons.length > 0
+                            ? "Total (clean + add-ons)"
+                            : "Estimated price"}
+                    </p>
+                    {isCustom && <p className="text-white/30 text-[10px] mt-0.5">Quoted individually</p>}
+                  </div>
+                  <p className="font-display font-black text-white text-2xl">
+                    {isCustom ? "Custom" : ttl ? fmt(ttl) : "—"}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ══ STEP 3: Details ══ */}
+            {st.step === 3 && (
+              <div className="px-4 pt-5 pb-4">
+                <h3 className="font-display font-black text-[1.2rem] text-ink-900 mb-1">Your details</h3>
+                <p className="text-ink-400 text-xs mb-4">So we can send your estimate and call to confirm.</p>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <input
+                      type="text"
+                      value={st.name}
+                      onChange={e => { up({ name: e.target.value }); if (errs.name) setErrs(p => ({ ...p, name: false })); }}
+                      placeholder="Name *"
+                      autoComplete="name"
+                      className={`w-full bg-white border rounded-2xl px-4 py-3.5 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all ${errs.name ? "border-red-400" : "border-gray-200 focus:border-violet-400"}`}
+                    />
+                    {errs.name && <p className="text-red-500 text-xs mt-1 ml-1">Enter your name</p>}
+                  </div>
+                  <div>
+                    <input
+                      type="tel"
+                      value={st.phone}
+                      onChange={e => { up({ phone: e.target.value }); if (errs.phone) setErrs(p => ({ ...p, phone: false })); }}
+                      placeholder="Phone * (04XX XXX XXX)"
+                      autoComplete="tel"
+                      className={`w-full bg-white border rounded-2xl px-4 py-3.5 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all ${errs.phone ? "border-red-400" : "border-gray-200 focus:border-violet-400"}`}
+                    />
+                    {errs.phone && <p className="text-red-500 text-xs mt-1 ml-1">Enter a phone number</p>}
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      value={st.suburb}
+                      onChange={e => { up({ suburb: e.target.value }); if (errs.suburb) setErrs(p => ({ ...p, suburb: false })); }}
+                      placeholder="Suburb * (e.g. Bonnie Brook)"
+                      autoComplete="address-level2"
+                      className={`w-full bg-white border rounded-2xl px-4 py-3.5 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all ${errs.suburb ? "border-red-400" : "border-gray-200 focus:border-violet-400"}`}
+                    />
+                    {errs.suburb && <p className="text-red-500 text-xs mt-1 ml-1">Enter your suburb</p>}
+                  </div>
+                  <label className="flex items-center gap-3 px-4 py-3.5 bg-white border border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-violet-300 transition-colors group">
+                    <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+                      <Camera className="w-4 h-4 text-violet-500" />
+                    </div>
+                    <span className={`text-sm transition-colors ${st.photoName ? "text-violet-600 font-medium" : "text-ink-400 group-hover:text-ink-600"}`}>
+                      {st.photoName || "Upload a photo (optional)"}
+                    </span>
+                    <input
+                      type="file" accept="image/*" capture="environment" className="hidden"
+                      onChange={e => {
+                        const f = e.target.files?.[0] ?? null;
+                        up({ photo: f, photoName: f?.name ?? "" });
+                      }}
+                    />
+                  </label>
+                  <textarea
+                    value={st.notes}
+                    onChange={e => up({ notes: e.target.value })}
+                    placeholder="Notes (optional) — gate code, dog on property, access notes…"
+                    rows={3}
+                    className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 transition-all resize-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* ══ STEP 4: Review ══ */}
+            {st.step === 4 && svc && (
+              <div className="px-4 pt-5 pb-4 space-y-4">
+                <div>
+                  <h3 className="font-display font-black text-[1.2rem] text-ink-900 mb-1">Review your quote</h3>
+                  <p className="text-ink-400 text-xs">Check the details, then send it through.</p>
+                </div>
+
+                <div className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden">
+                  {[
+                    { k: "Service",  v: svc.name },
+                    { k: "Area",     v: st.area + " m²" },
+                    ...(!svc.isMaintenance ? [
+                      { k: svc.name, v: isCustom ? "Custom quote" : fmt(svcPrice(svc.id, st.area) ?? 0), green: !isCustom },
+                      ...st.addons.map(id => {
+                        const a = CONFIG.addons.find(x => x.id === id)!;
+                        return { k: `+ ${a.name} (add-on, 40% off)`, v: isCustom ? "Custom" : fmt(addonBundled(id, st.area)), green: !isCustom };
+                      }),
+                    ] : [
+                      { k: "Billing",        v: st.billing === "quarterly" ? "Quarterly · 10% off" : "Prepaid annual · 15% off" },
+                      { k: "Price per visit", v: isCustom ? "Custom quote" : fmt(maintPrice(st.area, st.billing)), green: !isCustom },
+                    ]),
+                    { k: "Name",   v: st.name },
+                    { k: "Phone",  v: st.phone },
+                    { k: "Suburb", v: st.suburb },
+                    ...(st.notes ? [{ k: "Notes", v: st.notes }] : []),
+                  ].map(({ k, v, green }, i) => (
+                    <div key={i} className="flex items-start justify-between gap-3 px-4 py-3 border-b border-gray-100 last:border-0">
+                      <span className="text-ink-400 text-xs font-medium shrink-0 pt-0.5">{k}</span>
+                      <span className={`text-sm font-semibold text-right ${green ? "text-violet-600" : "text-ink-900"}`}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-ink-900 rounded-2xl p-4 flex items-center justify-between">
+                  <p className="text-white/50 text-[10px] uppercase tracking-widest">
+                    {svc.isMaintenance ? "Estimated price per visit" : "Estimated total"}
+                  </p>
+                  <p className="font-display font-black text-white text-2xl">
+                    {isCustom ? "Custom" : ttl ? fmt(ttl) : "—"}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ══ STEP 5: Success ══ */}
+            {st.step === 5 && (
+              <div className="flex flex-col h-full">
+                <button onClick={onClose} aria-label="Close" className="absolute top-4 right-4 z-10 text-ink-300 hover:text-ink-600 p-1 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center mb-4">
+                    <CheckCircle2 className="w-8 h-8 text-violet-600" />
+                  </div>
+                  <h3 className="font-display font-black text-xl text-ink-900 mb-2">
+                    Thanks{st.name ? `, ${st.name.split(" ")[0]}` : ""}!
+                  </h3>
+                  <p className="text-ink-400 text-sm leading-relaxed max-w-xs">
+                    We&apos;ve received your request and will call you shortly to confirm.
+                  </p>
+                  {st.phone && (
+                    <div className="mt-5 bg-violet-50 border border-violet-100 rounded-2xl px-6 py-3 text-center">
+                      <p className="text-violet-500 text-xs">We&apos;ll call you on</p>
+                      <p className="font-display font-black text-violet-700 text-xl mt-0.5">{st.phone}</p>
+                      <p className="text-violet-400 text-[11px] mt-1">within 24 hours · usually much sooner</p>
+                    </div>
+                  )}
+                </div>
+                <div className="px-5 pb-8 pt-3 border-t border-gray-100 flex flex-col gap-2 shrink-0">
+                  <a
+                    href={`tel:${CONFIG.phone.replace(/\s/g, "")}`}
+                    className="w-full py-4 flex items-center justify-center gap-2 bg-violet-600 text-white font-bold rounded-2xl text-sm hover:bg-violet-700 active:scale-[0.98] transition-all"
+                  >
+                    <Phone className="w-4 h-4" /> Call Now: {CONFIG.phone}
+                  </a>
+                  <button
+                    onClick={() => { reset(); go(0); }}
+                    className="w-full py-3 text-ink-400 text-sm font-medium hover:text-ink-600 transition-colors"
+                  >
+                    Start a new quote
+                  </button>
+                </div>
               </div>
             )}
 
           </div>
+
+          {/* ── Pinned footer CTA (steps 2–4 only) ── */}
+          {st.step >= 2 && st.step <= 4 && (
+            <div className="shrink-0 px-5 pb-6 pt-3 border-t border-gray-100 bg-white">
+              <button
+                onClick={
+                  st.step === 2 ? () => go(3) :
+                  st.step === 3 ? validateAndContinue :
+                  handleSubmit
+                }
+                disabled={submitting}
+                className="w-full py-4 bg-gradient-to-b from-violet-500 to-violet-700 text-white font-bold rounded-2xl text-sm hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-violet"
+              >
+                {submitting
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                  : st.step === 4 ? "Send Quote Request" : "Continue"}
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     </>
-  );
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StepShell({
-  q, sub, icon, children,
-}: {
-  q: string; sub?: string; icon?: React.ReactNode; children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2.5">
-      <div className="mb-0.5">
-        {icon && (
-          <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center mb-2">
-            {icon}
-          </div>
-        )}
-        <h3 className="font-bold text-ink-900 text-[1rem] leading-snug">{q}</h3>
-        {sub && <p className="text-ink-400 text-xs mt-1 leading-relaxed">{sub}</p>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function OptionBtn({
-  label, desc, icon, onClick,
-}: {
-  label: string; desc?: string; icon?: React.ReactNode; onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-left hover:border-violet-400 hover:bg-violet-50 active:scale-[0.98] transition-all shadow-sm group"
-    >
-      {icon && (
-        <div className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0 group-hover:bg-violet-100 transition-colors">
-          {icon}
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-ink-900 text-sm leading-tight">{label}</p>
-        {desc && <p className="text-ink-400 text-[11px] mt-0.5 leading-tight">{desc}</p>}
-      </div>
-      <ChevronRight className="w-4 h-4 text-ink-300 shrink-0 group-hover:text-violet-500 transition-colors" />
-    </button>
   );
 }
