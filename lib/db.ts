@@ -4,8 +4,22 @@ export function getDb() {
   return neon(process.env.DATABASE_URL!);
 }
 
-export async function initDb() {
+// Memoised — runs migrations only once per server process, not per request.
+let _initPromise: Promise<void> | null = null;
+
+export function initDb(): Promise<void> {
+  if (_initPromise) return _initPromise;
+  _initPromise = _runMigrations().catch(err => {
+    _initPromise = null; // allow retry on next request if it fails
+    throw err;
+  });
+  return _initPromise;
+}
+
+async function _runMigrations(): Promise<void> {
   const sql = getDb();
+
+  // customers must exist before quotes (FK), quotes before invoices (FK)
   await sql`
     CREATE TABLE IF NOT EXISTS customers (
       id          TEXT PRIMARY KEY,
@@ -41,37 +55,45 @@ export async function initDb() {
       created_at     TIMESTAMPTZ DEFAULT NOW()
     )
   `;
-  await sql`
-    CREATE TABLE IF NOT EXISTS invoices (
-      id             TEXT PRIMARY KEY,
-      invoice_number TEXT UNIQUE,
-      customer_id    TEXT REFERENCES customers(id),
-      quote_id       TEXT REFERENCES quotes(id),
-      amount         NUMERIC NOT NULL,
-      status         TEXT DEFAULT 'draft',
-      due_date       DATE,
-      paid_at        TIMESTAMPTZ,
-      notes          TEXT,
-      pdf_url        TEXT,
-      service        TEXT,
-      created_at     TIMESTAMPTZ DEFAULT NOW()
-    )
-  `;
-  await sql`ALTER TABLE invoices ADD COLUMN IF NOT EXISTS service TEXT`;
-  await sql`
-    CREATE TABLE IF NOT EXISTS projects (
-      id          TEXT PRIMARY KEY,
-      title       TEXT NOT NULL DEFAULT '',
-      description TEXT DEFAULT '',
-      image_urls  TEXT[] DEFAULT '{}',
-      created_at  TIMESTAMPTZ DEFAULT NOW()
-    )
-  `;
-  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS turf_size TEXT`;
-  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS service_detail TEXT`;
-  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_url TEXT`;
-  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_urls TEXT`;
-  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS notes TEXT`;
+
+  // invoices + projects are independent of each other — run in parallel
+  await Promise.all([
+    sql`
+      CREATE TABLE IF NOT EXISTS invoices (
+        id             TEXT PRIMARY KEY,
+        invoice_number TEXT UNIQUE,
+        customer_id    TEXT REFERENCES customers(id),
+        quote_id       TEXT REFERENCES quotes(id),
+        amount         NUMERIC NOT NULL,
+        status         TEXT DEFAULT 'draft',
+        due_date       DATE,
+        paid_at        TIMESTAMPTZ,
+        notes          TEXT,
+        pdf_url        TEXT,
+        service        TEXT,
+        created_at     TIMESTAMPTZ DEFAULT NOW()
+      )
+    `,
+    sql`
+      CREATE TABLE IF NOT EXISTS projects (
+        id          TEXT PRIMARY KEY,
+        title       TEXT NOT NULL DEFAULT '',
+        description TEXT DEFAULT '',
+        image_urls  TEXT[] DEFAULT '{}',
+        created_at  TIMESTAMPTZ DEFAULT NOW()
+      )
+    `,
+  ]);
+
+  // All ALTER TABLE migrations in parallel — safe since they're idempotent
+  await Promise.all([
+    sql`ALTER TABLE invoices ADD COLUMN IF NOT EXISTS service TEXT`,
+    sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS turf_size TEXT`,
+    sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS service_detail TEXT`,
+    sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_url TEXT`,
+    sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_urls TEXT`,
+    sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS notes TEXT`,
+  ]);
 }
 
 export interface DbCustomer {
