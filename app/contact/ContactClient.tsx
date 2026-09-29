@@ -36,7 +36,7 @@ export default function ContactClient() {
               </div>
               <div>
                 <p className="text-ink-300 text-xs uppercase tracking-widest mb-1">Address</p>
-                <p className="text-ink-900 font-semibold">15 Nokota Circuit, Bonnie Brook VIC 3335</p>
+                <p className="text-ink-900 font-semibold">Bonnie Brook VIC 3335</p>
                 <p className="text-ink-500">Servicing all Melbourne suburbs</p>
               </div>
             </li>
