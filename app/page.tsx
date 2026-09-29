@@ -163,18 +163,21 @@ export default function HomePage() {
               style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               onScroll={onHeroScroll}
             >
-              {heroImages.map((img, i) => (
-                <div key={img.src} className="relative flex-none w-full h-full" style={{ scrollSnapAlign: 'start' }}>
-                  <Image
-                    src={img.src}
-                    alt={img.alt}
-                    fill
-                    className="object-cover object-[60%_center]"
-                    priority={i === 0}
-                    unoptimized={img.src.startsWith('/api/image')}
-                  />
-                </div>
-              ))}
+              {heroImages.map((img, i) => {
+                const isLogo = img.src.includes('logo');
+                return (
+                  <div key={img.src} className={`relative flex-none w-full h-full ${isLogo ? 'bg-white' : ''}`} style={{ scrollSnapAlign: 'start' }}>
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      fill
+                      className={isLogo ? 'object-contain p-6' : 'object-cover object-[60%_center]'}
+                      priority={i === 0}
+                      unoptimized={img.src.startsWith('/api/image')}
+                    />
+                  </div>
+                );
+              })}
             </div>
 
             {/* Overlay */}
