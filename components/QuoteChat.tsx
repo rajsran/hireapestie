@@ -323,24 +323,6 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                   </div>
                 )}
 
-                {/* Price panel */}
-                <div className="bg-ink-900 rounded-2xl p-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-white/50 text-[10px] uppercase tracking-widest leading-snug">
-                      {isCustom
-                        ? "Over 100m²"
-                        : svc.isMaintenance
-                          ? "Price per visit"
-                          : st.addons.length > 0
-                            ? "Total (clean + add-ons)"
-                            : "Estimated price"}
-                    </p>
-                    {isCustom && <p className="text-white/30 text-[10px] mt-0.5">Quoted individually</p>}
-                  </div>
-                  <p className="font-display font-black text-white text-2xl">
-                    {isCustom ? "Custom" : ttl ? fmt(ttl) : "—"}
-                  </p>
-                </div>
               </div>
             )}
 
@@ -443,14 +425,6 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                   ))}
                 </div>
 
-                <div className="bg-ink-900 rounded-2xl p-4 flex items-center justify-between">
-                  <p className="text-white/50 text-[10px] uppercase tracking-widest">
-                    {svc.isMaintenance ? "Estimated price per visit" : "Estimated total"}
-                  </p>
-                  <p className="font-display font-black text-white text-2xl">
-                    {isCustom ? "Custom" : ttl ? fmt(ttl) : "—"}
-                  </p>
-                </div>
               </div>
             )}
 
@@ -499,20 +473,41 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
 
           {/* ── Pinned footer CTA (steps 2–4 only) ── */}
           {st.step >= 2 && st.step <= 4 && (
-            <div className="shrink-0 px-5 pb-6 pt-3 border-t border-gray-100 bg-white">
-              <button
-                onClick={
-                  st.step === 2 ? () => go(3) :
-                  st.step === 3 ? validateAndContinue :
-                  handleSubmit
-                }
-                disabled={submitting}
-                className="w-full py-4 bg-gradient-to-b from-violet-500 to-violet-700 text-white font-bold rounded-2xl text-sm hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-violet"
-              >
-                {submitting
-                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
-                  : st.step === 4 ? "Send Quote Request" : "Continue"}
-              </button>
+            <div className="shrink-0 bg-white border-t border-gray-100">
+              {/* Price bar — steps 2 and 4 only */}
+              {(st.step === 2 || st.step === 4) && svc && (
+                <div className="bg-ink-900 px-5 py-3.5 flex items-center justify-between">
+                  <div>
+                    <p className="text-white/50 text-[10px] uppercase tracking-widest leading-snug">
+                      {st.step === 2
+                        ? isCustom ? "Over 100m²"
+                          : svc.isMaintenance ? "Price per visit"
+                          : st.addons.length > 0 ? "Total (clean + add-ons)"
+                          : "Estimated price"
+                        : svc.isMaintenance ? "Estimated price per visit" : "Estimated total"}
+                    </p>
+                    {isCustom && st.step === 2 && <p className="text-white/30 text-[10px] mt-0.5">Quoted individually</p>}
+                  </div>
+                  <p className="font-display font-black text-white text-2xl">
+                    {isCustom ? "Custom" : ttl ? fmt(ttl) : "—"}
+                  </p>
+                </div>
+              )}
+              <div className="px-5 pb-6 pt-3">
+                <button
+                  onClick={
+                    st.step === 2 ? () => go(3) :
+                    st.step === 3 ? validateAndContinue :
+                    handleSubmit
+                  }
+                  disabled={submitting}
+                  className="w-full py-4 bg-gradient-to-b from-violet-500 to-violet-700 text-white font-bold rounded-2xl text-sm hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-violet"
+                >
+                  {submitting
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                    : st.step === 4 ? "Send Quote Request" : "Continue"}
+                </button>
+              </div>
             </div>
           )}
 
