@@ -33,9 +33,6 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
-          <Link href="/contact" className="ml-2 px-5 py-2.5 rounded-full bg-violet-600 text-white text-sm font-bold shadow-violet hover:bg-violet-700 transition-all duration-200">
-            Free Quote
-          </Link>
         </div>
       </div>
 
@@ -76,13 +73,6 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
-            <Link
-              href="/contact"
-              onClick={() => setOpen(false)}
-              className="mt-2 px-5 py-3 rounded-full bg-violet-600 text-white text-sm font-bold text-center shadow-violet"
-            >
-              Get a Free Quote
-            </Link>
             <div className="flex items-center gap-4 pt-1">
               <a
                 href="https://www.instagram.com/turfcleanpros/"
