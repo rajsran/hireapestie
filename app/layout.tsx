@@ -124,10 +124,8 @@ export default function RootLayout({
                   email: "admin@turfcleanpros.com.au",
                   address: {
                     "@type": "PostalAddress",
-                    streetAddress: "15 Nokota Circuit",
                     addressLocality: "Bonnie Brook",
                     addressRegion: "VIC",
-                    postalCode: "3335",
                     addressCountry: "AU",
                   },
                   geo: {
