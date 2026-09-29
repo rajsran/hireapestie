@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Gallery | Turf Cleaning Before & After Photos Melbourne",
   description:
     "See real before and after photos of turf cleaning jobs completed by Turf Clean Pros across Melbourne. Residential and commercial turf cleaning results.",
+  keywords: [
+    "turf cleaning before after photos Melbourne",
+    "synthetic turf cleaning results Melbourne",
+    "artificial grass cleaning gallery",
+    "turf cleaning photos Melbourne",
+    "turf clean pros gallery",
+  ],
   openGraph: {
     title: "Turf Cleaning Gallery | Before & After Photos Melbourne",
     description:

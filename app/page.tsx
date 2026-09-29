@@ -17,7 +17,6 @@ const services = [
 
 const STATIC_HERO = [
   { src: "/hero.jpeg",  alt: "Turf Clean Pros — Professional Turf Cleaning Melbourne" },
-  { src: "/hero1.jpeg", alt: "Turf Clean Pros — Melbourne's Largest Turf Cleaning Service" },
   { src: "/logo.png",   alt: "Turf Clean Pros Logo" },
 ];
 

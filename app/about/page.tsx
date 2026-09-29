@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "About Us | Melbourne Turf Cleaning Experts",
   description:
     "Turf Clean Pros is Melbourne's most trusted turf cleaning company. Thousands of happy customers, top-rated on Google, fully insured, all suburbs covered.",
+  keywords: [
+    "about Turf Clean Pros Melbourne",
+    "Melbourne turf cleaning company",
+    "trusted turf cleaners Melbourne",
+    "fully insured turf cleaning Melbourne",
+    "synthetic turf specialists Melbourne",
+  ],
   openGraph: {
     title: "About Turf Clean Pros | Melbourne's Most Trusted Turf Cleaners",
     description:

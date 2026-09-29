@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import ProjectsClient from './ProjectsClient';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Projects | Real Turf Cleaning Jobs Across Melbourne",
   description:
     "Browse real turf cleaning and bird proofing jobs completed by Turf Clean Pros across Melbourne suburbs. See the quality of our work before you book.",
+  keywords: [
+    "turf cleaning projects Melbourne",
+    "synthetic turf cleaning before after Melbourne",
+    "turf cleaning results Melbourne",
+    "residential turf cleaning jobs Melbourne",
+    "commercial turf cleaning portfolio",
+  ],
   openGraph: {
     title: "Our Projects | Real Turf Cleaning Jobs Melbourne",
     description:
