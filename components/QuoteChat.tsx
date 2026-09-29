@@ -82,15 +82,33 @@ const fmt = (n: number) => "$" + n.toLocaleString("en-AU");
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
-  const [st, setSt]           = useState<St>(INIT);
-  const [errs, setErrs]       = useState({ name: false, phone: false, suburb: false });
-  const [submitting, setSub]  = useState(false);
-  const scrollRef             = useRef<HTMLDivElement>(null);
+  const [st, setSt]             = useState<St>(INIT);
+  const [errs, setErrs]         = useState({ name: false, phone: false, suburb: false });
+  const [submitting, setSub]    = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const scrollRef               = useRef<HTMLDivElement>(null);
 
   const up  = (patch: Partial<St>) => setSt(prev => ({ ...prev, ...patch }));
   const stl = () => setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 60);
   const go  = (step: number) => { up({ step }); stl(); };
-  const reset = () => { setSt(INIT); setErrs({ name: false, phone: false, suburb: false }); setSub(false); };
+  const reset = () => { setSt(INIT); setErrs({ name: false, phone: false, suburb: false }); setSub(false); setPhotoUrl(null); setUploading(false); };
+
+  const handlePhotoSelect = async (file: File) => {
+    up({ photo: file, photoName: file.name });
+    setUploading(true);
+    setPhotoUrl(null);
+    try {
+      const fd = new FormData();
+      fd.append("photo", file);
+      const res = await fetch("/api/quote/upload-photo", { method: "POST", body: fd });
+      if (res.ok) {
+        const { url } = await res.json();
+        setPhotoUrl(url);
+      }
+    } catch { /* upload failed silently — photo won't be in the lead */ }
+    setUploading(false);
+  };
 
   if (!isOpen) return null;
 
@@ -115,6 +133,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
       estimatedPrice: isCustom ? "Custom quote" : ttl ? fmt(ttl) : undefined,
       name: st.name, phone: st.phone, suburb: st.suburb,
       notes: st.notes || undefined,
+      photoUrl: photoUrl || undefined,
     };
     try {
       if (CONFIG.webhookUrl) {
@@ -365,18 +384,31 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                     />
                     {errs.suburb && <p className="text-red-500 text-xs mt-1 ml-1">Enter your suburb</p>}
                   </div>
-                  <label className="flex items-center gap-3 px-4 py-3.5 bg-white border border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-violet-300 transition-colors group">
-                    <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
-                      <Camera className="w-4 h-4 text-violet-500" />
+                  <label className={`flex items-center gap-3 px-4 py-3.5 bg-white border border-dashed rounded-2xl cursor-pointer transition-colors group ${photoUrl ? "border-violet-400" : "border-gray-200 hover:border-violet-300"}`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${photoUrl ? "bg-violet-600" : "bg-violet-50"}`}>
+                      {uploading
+                        ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+                        : photoUrl
+                          ? <span className="text-white font-bold text-sm">✓</span>
+                          : <Camera className="w-4 h-4 text-violet-500" />}
                     </div>
-                    <span className={`text-sm transition-colors ${st.photoName ? "text-violet-600 font-medium" : "text-ink-400 group-hover:text-ink-600"}`}>
-                      {st.photoName || "Upload a photo (optional)"}
+                    <span className={`text-sm transition-colors flex-1 ${photoUrl ? "text-violet-600 font-medium" : uploading ? "text-ink-400" : st.photoName ? "text-ink-600" : "text-ink-400 group-hover:text-ink-600"}`}>
+                      {uploading ? "Uploading…" : photoUrl ? st.photoName : st.photoName || "Upload a photo (optional)"}
                     </span>
+                    {photoUrl && (
+                      <button
+                        type="button"
+                        onClick={e => { e.preventDefault(); up({ photo: null, photoName: "" }); setPhotoUrl(null); }}
+                        className="text-ink-300 hover:text-red-400 transition-colors text-xs"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
                     <input
                       type="file" accept="image/*" capture="environment" className="hidden"
                       onChange={e => {
-                        const f = e.target.files?.[0] ?? null;
-                        up({ photo: f, photoName: f?.name ?? "" });
+                        const f = e.target.files?.[0];
+                        if (f) handlePhotoSelect(f);
                       }}
                     />
                   </label>

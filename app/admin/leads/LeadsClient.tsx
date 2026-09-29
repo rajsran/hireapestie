@@ -253,6 +253,25 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
             </div>
           )}
 
+          {/* Customer photo */}
+          {lead.photoUrl && (
+            <div>
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Customer Photo</span>
+              <a href={lead.photoUrl} target="_blank" rel="noopener noreferrer" className="block mt-1.5 rounded-xl overflow-hidden border border-gray-100 hover:border-orange-300 transition-colors">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={lead.photoUrl} alt="Customer photo" className="w-full max-h-48 object-cover" />
+              </a>
+            </div>
+          )}
+
+          {/* Notes */}
+          {lead.notes && (
+            <div>
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Notes</span>
+              <p className="text-xs text-gray-700 mt-0.5 leading-relaxed">{lead.notes}</p>
+            </div>
+          )}
+
           {/* Accepted address */}
           {lead.accepted && lead.address && (
             <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2.5 space-y-0.5">

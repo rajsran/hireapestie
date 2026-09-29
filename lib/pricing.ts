@@ -15,6 +15,8 @@ export interface QuoteLead {
   name?: string;
   email?: string;
   phone?: string;
+  notes?: string;
+  photoUrl?: string;
 }
 
 const TURF_SIZE_PRICING: Record<string, { low: number; high: number; note?: string }> = {

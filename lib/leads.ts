@@ -27,6 +27,8 @@ export interface Lead {
   address?: string;
   shortId?: string;
   pdfUrl?: string;
+  photoUrl?: string;
+  notes?: string;
 }
 
 function getDb() {
@@ -62,6 +64,8 @@ function rowToLead(r: Record<string, unknown>): Lead {
     address: r.address as string | undefined,
     shortId: r.short_id as string | undefined,
     pdfUrl: r.pdf_url as string | undefined,
+    photoUrl: r.photo_url as string | undefined,
+    notes: r.notes as string | undefined,
   };
 }
 
@@ -132,7 +136,9 @@ export async function saveLead(lead: Lead): Promise<void> {
       accepted_at    = COALESCE(${lead.acceptedAt ? lead.acceptedAt : null}::timestamptz, accepted_at),
       address        = COALESCE(${lead.address ?? null}, address),
       short_id       = COALESCE(${lead.shortId ?? null}, short_id),
-      pdf_url        = COALESCE(${lead.pdfUrl ?? null}, pdf_url)
+      pdf_url        = COALESCE(${lead.pdfUrl ?? null}, pdf_url),
+      photo_url      = COALESCE(${lead.photoUrl ?? null}, photo_url),
+      notes          = COALESCE(${lead.notes ?? null}, notes)
     WHERE id = ${lead.id}
   `;
 }
