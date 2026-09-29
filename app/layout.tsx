@@ -44,6 +44,15 @@ export const metadata: Metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+  icons: {
+    icon: [
+      { url: "/fevicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/fevicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/fevicon/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/fevicon/favicon.ico", sizes: "any" },
+    ],
+    apple: "/fevicon/apple-touch-icon.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_AU",
@@ -51,13 +60,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: DEFAULT_TITLE,
     description: DEFAULT_DESC,
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Turf Clean Pros — Melbourne's #1 Turf Cleaning Service" }],
+    images: [{ url: "/logo.jpeg", width: 1408, height: 768, alt: "Turf Clean Pros — Melbourne's #1 Turf Cleaning Service" }],
   },
   twitter: {
     card: "summary_large_image",
     title: DEFAULT_TITLE,
     description: DEFAULT_DESC,
-    images: ["/og-image.jpg"],
+    images: ["/logo.jpeg"],
   },
   alternates: { canonical: SITE_URL },
 };
