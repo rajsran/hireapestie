@@ -42,13 +42,19 @@ interface St {
   area: number;
   addons: string[];
   billing: "quarterly" | "annual";
-  name: string; phone: string; suburb: string;
-  photo: File | null; photoName: string; notes: string;
+  name: string; phone: string; suburb: string; notes: string;
+}
+
+interface PhotoEntry {
+  id: string;
+  file: File;
+  url: string | null;
+  uploading: boolean;
 }
 
 const INIT: St = {
-  step: 0, serviceId: "", area: CONFIG.sliderMin, addons: [], billing: "quarterly",
-  name: "", phone: "", suburb: "", photo: null, photoName: "", notes: "",
+  step: 1, serviceId: "", area: CONFIG.sliderMin, addons: [], billing: "quarterly",
+  name: "", phone: "", suburb: "", notes: "",
 };
 
 export interface QuoteChatProps { isOpen: boolean; onClose: () => void; }
@@ -83,32 +89,37 @@ const fmt = (n: number) => "$" + n.toLocaleString("en-AU");
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   const [st, setSt]             = useState<St>(INIT);
-  const [errs, setErrs]         = useState({ name: false, phone: false, suburb: false });
-  const [submitting, setSub]    = useState(false);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const scrollRef               = useRef<HTMLDivElement>(null);
+  const [errs, setErrs]               = useState({ name: false, phone: false, suburb: false });
+  const [submitting, setSub]          = useState(false);
+  const [photoEntries, setPhotoEntries] = useState<PhotoEntry[]>([]);
+  const scrollRef                     = useRef<HTMLDivElement>(null);
 
   const up  = (patch: Partial<St>) => setSt(prev => ({ ...prev, ...patch }));
   const stl = () => setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 60);
   const go  = (step: number) => { up({ step }); stl(); };
-  const reset = () => { setSt(INIT); setErrs({ name: false, phone: false, suburb: false }); setSub(false); setPhotoUrl(null); setUploading(false); };
+  const reset = () => { setSt(INIT); setErrs({ name: false, phone: false, suburb: false }); setSub(false); setPhotoEntries([]); };
 
-  const handlePhotoSelect = async (file: File) => {
-    up({ photo: file, photoName: file.name });
-    setUploading(true);
-    setPhotoUrl(null);
-    try {
-      const fd = new FormData();
-      fd.append("photo", file);
-      const res = await fetch("/api/quote/upload-photo", { method: "POST", body: fd });
-      if (res.ok) {
-        const { url } = await res.json();
-        setPhotoUrl(url);
+  const handlePhotoSelect = async (fileList: FileList | File[]) => {
+    const files = Array.from(fileList).slice(0, 6 - photoEntries.length);
+    if (files.length === 0) return;
+    const newEntries: PhotoEntry[] = files.map(f => ({
+      id: Math.random().toString(36).slice(2, 10),
+      file: f, url: null, uploading: true,
+    }));
+    setPhotoEntries(prev => [...prev, ...newEntries]);
+    await Promise.all(newEntries.map(async entry => {
+      try {
+        const fd = new FormData();
+        fd.append("photo", entry.file);
+        const res = await fetch("/api/quote/upload-photo", { method: "POST", body: fd });
+        const url = res.ok ? ((await res.json()).url as string) : null;
+        setPhotoEntries(prev => prev.map(p => p.id === entry.id ? { ...p, url, uploading: false } : p));
+      } catch {
+        setPhotoEntries(prev => prev.map(p => p.id === entry.id ? { ...p, uploading: false } : p));
       }
-    } catch { /* upload failed silently — photo won't be in the lead */ }
-    setUploading(false);
+    }));
   };
+  const removePhoto = (id: string) => setPhotoEntries(prev => prev.filter(p => p.id !== id));
 
   if (!isOpen) return null;
 
@@ -126,6 +137,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
 
   const handleSubmit = async () => {
     setSub(true);
+    const uploadedUrls = photoEntries.filter(p => p.url).map(p => p.url!);
     const body = {
       service: svc?.name, area: st.area + "m²",
       addons: st.addons.map(id => CONFIG.addons.find(a => a.id === id)?.name),
@@ -133,13 +145,13 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
       estimatedPrice: isCustom ? "Custom quote" : ttl ? fmt(ttl) : undefined,
       name: st.name, phone: st.phone, suburb: st.suburb,
       notes: st.notes || undefined,
-      photoUrl: photoUrl || undefined,
+      photoUrls: uploadedUrls.length > 0 ? uploadedUrls : undefined,
     };
     try {
       if (CONFIG.webhookUrl) {
         const fd = new FormData();
         fd.append("data", JSON.stringify(body));
-        if (st.photo) fd.append("photo", st.photo, st.photo.name);
+        for (const entry of photoEntries) fd.append("photos", entry.file, entry.file.name);
         await fetch(CONFIG.webhookUrl, { method: "POST", body: fd });
       } else {
         await fetch("/api/quote/submit", {
@@ -384,34 +396,53 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                     />
                     {errs.suburb && <p className="text-red-500 text-xs mt-1 ml-1">Enter your suburb</p>}
                   </div>
-                  <label className={`flex items-center gap-3 px-4 py-3.5 bg-white border border-dashed rounded-2xl cursor-pointer transition-colors group ${photoUrl ? "border-violet-400" : "border-gray-200 hover:border-violet-300"}`}>
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${photoUrl ? "bg-violet-600" : "bg-violet-50"}`}>
-                      {uploading
-                        ? <Loader2 className="w-4 h-4 text-white animate-spin" />
-                        : photoUrl
-                          ? <span className="text-white font-bold text-sm">✓</span>
-                          : <Camera className="w-4 h-4 text-violet-500" />}
-                    </div>
-                    <span className={`text-sm transition-colors flex-1 ${photoUrl ? "text-violet-600 font-medium" : uploading ? "text-ink-400" : st.photoName ? "text-ink-600" : "text-ink-400 group-hover:text-ink-600"}`}>
-                      {uploading ? "Uploading…" : photoUrl ? st.photoName : st.photoName || "Upload a photo (optional)"}
-                    </span>
-                    {photoUrl && (
-                      <button
-                        type="button"
-                        onClick={e => { e.preventDefault(); up({ photo: null, photoName: "" }); setPhotoUrl(null); }}
-                        className="text-ink-300 hover:text-red-400 transition-colors text-xs"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                  <div>
+                    {photoEntries.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {photoEntries.map(entry => (
+                          <div key={entry.id} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                            {entry.uploading ? (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Loader2 className="w-5 h-5 text-violet-400 animate-spin" />
+                              </div>
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={URL.createObjectURL(entry.file)} alt="" className="w-full h-full object-cover" />
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removePhoto(entry.id)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-black/50 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                            {entry.url && (
+                              <div className="absolute bottom-1 left-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-[8px] font-bold leading-none">✓</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     )}
-                    <input
-                      type="file" accept="image/*" capture="environment" className="hidden"
-                      onChange={e => {
-                        const f = e.target.files?.[0];
-                        if (f) handlePhotoSelect(f);
-                      }}
-                    />
-                  </label>
+                    {photoEntries.length < 6 && (
+                      <label className="flex items-center gap-3 px-4 py-3.5 bg-white border border-dashed border-gray-200 hover:border-violet-300 rounded-2xl cursor-pointer transition-colors group">
+                        <div className="w-8 h-8 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+                          <Camera className="w-4 h-4 text-violet-500" />
+                        </div>
+                        <span className="text-sm text-ink-400 group-hover:text-ink-600 transition-colors">
+                          {photoEntries.length === 0 ? "Upload photos (optional)" : `Add another (${photoEntries.length}/6)`}
+                        </span>
+                        <input
+                          type="file" accept="image/*" multiple className="hidden"
+                          onChange={e => {
+                            if (e.target.files) handlePhotoSelect(e.target.files);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
                   <textarea
                     value={st.notes}
                     onChange={e => up({ notes: e.target.value })}

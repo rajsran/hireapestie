@@ -253,16 +253,26 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
             </div>
           )}
 
-          {/* Customer photo */}
-          {lead.photoUrl && (
-            <div>
-              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Customer Photo</span>
-              <a href={lead.photoUrl} target="_blank" rel="noopener noreferrer" className="block mt-1.5 rounded-xl overflow-hidden border border-gray-100 hover:border-orange-300 transition-colors">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={lead.photoUrl} alt="Customer photo" className="w-full max-h-48 object-cover" />
-              </a>
-            </div>
-          )}
+          {/* Customer photos */}
+          {(() => {
+            const photos = lead.photoUrls ?? (lead.photoUrl ? [lead.photoUrl] : []);
+            if (photos.length === 0) return null;
+            return (
+              <div>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
+                  Customer Photo{photos.length > 1 ? `s (${photos.length})` : ""}
+                </span>
+                <div className={`mt-1.5 grid gap-1.5 ${photos.length === 1 ? "grid-cols-1" : "grid-cols-3"}`}>
+                  {photos.map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-gray-100 hover:border-orange-300 transition-colors">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`Customer photo ${i + 1}`} className={`w-full object-cover ${photos.length === 1 ? "max-h-48" : "aspect-square"}`} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Notes */}
           {lead.notes && (

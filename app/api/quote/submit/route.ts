@@ -37,7 +37,7 @@ async function upsertCustomerAndQuote(
   shortId: string,
   estimate: { low: number; high: number } | null,
   pdfUrl?: string,
-  photoUrl?: string,
+  photoUrls?: string[],
 ): Promise<void> {
   try {
     await initDb();
@@ -78,7 +78,7 @@ async function upsertCustomerAndQuote(
         id, customer_id, service, turf_size, service_detail,
         levels, roof_type, bedrooms, panels,
         type, size, timeline, estimate_low, estimate_high,
-        pdf_url, short_id, photo_url, notes, created_at
+        pdf_url, short_id, photo_url, photo_urls, notes, created_at
       ) VALUES (
         ${quoteId}, ${customerId}, ${lead.service ?? null},
         ${lead.turfSize ?? null}, ${lead.serviceDetail ?? null},
@@ -87,7 +87,8 @@ async function upsertCustomerAndQuote(
         ${lead.timeline ?? null},
         ${estimate?.low ?? null}, ${estimate?.high ?? null},
         ${pdfUrl ?? null}, ${shortId},
-        ${photoUrl ?? null}, ${lead.notes ?? null}, NOW()
+        ${photoUrls?.[0] ?? null}, ${photoUrls && photoUrls.length > 0 ? JSON.stringify(photoUrls) : null},
+        ${lead.notes ?? null}, NOW()
       )
     `;
   } catch (err) {
@@ -133,7 +134,8 @@ export async function POST(req: NextRequest) {
         console.error("⚠️  PDF generation failed:", err);
       }
 
-      await upsertCustomerAndQuote(lead, leadId, shortId, estimate, pdfUrl, lead.photoUrl);
+      const photoUrls = lead.photoUrls ?? (lead.photoUrl ? [lead.photoUrl] : undefined);
+      await upsertCustomerAndQuote(lead, leadId, shortId, estimate, pdfUrl, photoUrls);
 
       // Send SMS last (needs pdfUrl)
       if (lead.phone) {

@@ -28,6 +28,7 @@ export interface Lead {
   shortId?: string;
   pdfUrl?: string;
   photoUrl?: string;
+  photoUrls?: string[];
   notes?: string;
 }
 
@@ -65,6 +66,7 @@ function rowToLead(r: Record<string, unknown>): Lead {
     shortId: r.short_id as string | undefined,
     pdfUrl: r.pdf_url as string | undefined,
     photoUrl: r.photo_url as string | undefined,
+    photoUrls: r.photo_urls ? (JSON.parse(r.photo_urls as string) as string[]) : undefined,
     notes: r.notes as string | undefined,
   };
 }
@@ -138,6 +140,7 @@ export async function saveLead(lead: Lead): Promise<void> {
       short_id       = COALESCE(${lead.shortId ?? null}, short_id),
       pdf_url        = COALESCE(${lead.pdfUrl ?? null}, pdf_url),
       photo_url      = COALESCE(${lead.photoUrl ?? null}, photo_url),
+      photo_urls     = COALESCE(${lead.photoUrls ? JSON.stringify(lead.photoUrls) : null}, photo_urls),
       notes          = COALESCE(${lead.notes ?? null}, notes)
     WHERE id = ${lead.id}
   `;

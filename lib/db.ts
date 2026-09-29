@@ -70,6 +70,7 @@ export async function initDb() {
   await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS turf_size TEXT`;
   await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS service_detail TEXT`;
   await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_url TEXT`;
+  await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS photo_urls TEXT`;
   await sql`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS notes TEXT`;
 }
 
