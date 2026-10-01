@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Lead } from "@/lib/leads";
-import { ArrowLeft, Trash2, Phone, Mail, Users, ChevronDown, ChevronUp, SendHorizonal, CheckCircle2, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Trash2, Phone, Mail, Users, ChevronDown, ChevronUp, SendHorizonal, CheckCircle2, Pencil, ChevronLeft, ChevronRight, MapPin, Ruler, DollarSign, FileText } from "lucide-react";
 
 const SENDING_MESSAGES = [
   "📤 Sending the quote...",
@@ -165,67 +165,95 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
   }
 
   const estimateText = lead.estimate
-    ? `$${lead.estimate.low}–$${lead.estimate.high}`
+    ? `$${lead.estimate.low.toLocaleString()}–$${lead.estimate.high.toLocaleString()}`
     : null;
+
+  const locationText = [lead.suburb, lead.postcode].filter(Boolean).join(" ");
+  const priceLabel = lead.accepted
+    ? `Accepted · $${lead.finalQuote?.toLocaleString()}`
+    : lead.finalQuote
+      ? `Final · $${lead.finalQuote.toLocaleString()}`
+      : estimateText
+        ? `Est. ${estimateText}`
+        : null;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Top row */}
-      <div className="px-4 py-3 flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-ink-900 text-sm">{lead.name ?? "Unknown"}</span>
-            {lead.service && (
-              <span className="text-[10px] bg-orange-50 text-orange-600 font-semibold px-2 py-0.5 rounded-full border border-orange-100">
-                {lead.service}
-              </span>
-            )}
-            {lead.accepted ? (
-              <span className="text-[10px] bg-green-50 text-green-700 font-semibold px-2 py-0.5 rounded-full border border-green-200 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                Accepted
-              </span>
-            ) : sent && lead.finalQuote ? (
-              <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full border border-blue-200 flex items-center gap-1">
-                <SendHorizonal className="w-3 h-3" />
-                Quote sent · ${lead.finalQuote.toLocaleString()}
-              </span>
-            ) : estimateText ? (
-              <span className="text-[10px] bg-gray-50 text-gray-500 font-medium px-2 py-0.5 rounded-full border border-gray-200">
-                Est. {estimateText}
-              </span>
-            ) : null}
+      <div className="px-4 pt-3 pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-ink-900 text-sm">{lead.name ?? "Unknown"}</span>
+              {lead.accepted ? (
+                <span className="text-[10px] bg-green-50 text-green-700 font-semibold px-2 py-0.5 rounded-full border border-green-200 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Accepted
+                </span>
+              ) : sent && lead.finalQuote ? (
+                <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full border border-blue-200 flex items-center gap-1">
+                  <SendHorizonal className="w-3 h-3" /> Quote sent
+                </span>
+              ) : null}
+            </div>
+            <p className="text-[11px] text-gray-400 mt-0.5">{formatDate(lead.createdAt)}</p>
           </div>
-          <p className="text-[11px] text-gray-400 mt-0.5">{formatDate(lead.createdAt)}</p>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => { setShowEdit(false); setExpanded(e => !e); }}
+              className="text-gray-300 hover:text-gray-500 transition-colors"
+            >
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="text-gray-300 hover:text-red-500 disabled:opacity-30 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => { setShowEdit(false); setExpanded(e => !e); }}
-            className="text-gray-300 hover:text-gray-500 transition-colors"
-          >
-            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-gray-300 hover:text-red-500 disabled:opacity-30 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+
+        {/* ── Always-visible summary strip ── */}
+        <div className="mt-2 mb-1 flex flex-wrap gap-x-4 gap-y-1.5">
+          {lead.service && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-orange-500">{lead.service}</span>
+            </div>
+          )}
+          {lead.turfSize && (
+            <div className="flex items-center gap-1 text-gray-500">
+              <Ruler className="w-3 h-3 text-gray-400" />
+              <span className="text-xs font-medium">{lead.turfSize}</span>
+            </div>
+          )}
+          {locationText && (
+            <div className="flex items-center gap-1 text-gray-500">
+              <MapPin className="w-3 h-3 text-gray-400" />
+              <span className="text-xs font-medium">{locationText}</span>
+            </div>
+          )}
+          {priceLabel && (
+            <div className={`flex items-center gap-1 font-semibold text-xs ${lead.accepted ? "text-green-600" : lead.finalQuote ? "text-blue-600" : "text-gray-500"}`}>
+              <DollarSign className="w-3 h-3" />
+              <span>{priceLabel}</span>
+            </div>
+          )}
+          {lead.phone && (
+            <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-gray-500 hover:text-orange-500 transition-colors">
+              <Phone className="w-3 h-3 text-gray-400" />
+              <span className="text-xs">{lead.phone}</span>
+            </a>
+          )}
         </div>
       </div>
 
       {/* Expanded */}
       {expanded && (
-        <div className="border-t border-gray-50 px-4 py-3 space-y-3">
+        <div className="border-t border-gray-100 px-4 py-3 space-y-3">
+
           {/* Contact */}
-          <div className="space-y-1.5">
-            {lead.phone && (
-              <a href={`tel:${lead.phone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-orange-500 transition-colors">
-                <Phone className="w-3.5 h-3.5 text-gray-400" />
-                {lead.phone}
-              </a>
-            )}
+          <div className="flex flex-col gap-1.5">
             {lead.email ? (
               <a href={`mailto:${lead.email}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-orange-500 transition-colors">
                 <Mail className="w-3.5 h-3.5 text-gray-400" />
@@ -238,19 +266,36 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
             )}
           </div>
 
-          {/* Job details (read-only summary when not editing) */}
+          {/* Job details grid */}
           {!showEdit && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              {lead.turfSize     && <Detail label="Turf Size"   value={lead.turfSize} />}
+            <div className="bg-gray-50 rounded-xl px-3 py-2.5 grid grid-cols-2 gap-x-6 gap-y-2">
+              {lead.service       && <Detail label="Service"    value={lead.service} />}
+              {lead.turfSize      && <Detail label="Area"       value={lead.turfSize} />}
+              {lead.suburb        && <Detail label="Suburb"     value={[lead.suburb, lead.postcode].filter(Boolean).join(", ")} />}
               {lead.serviceDetail && <Detail label="Treatment"  value={lead.serviceDetail} />}
-              {lead.levels       && <Detail label="Levels"      value={lead.levels} />}
-              {lead.roofType     && <Detail label="Roof"        value={lead.roofType} />}
-              {lead.bedrooms     && <Detail label="Bedrooms"    value={lead.bedrooms} />}
-              {lead.panels       && <Detail label="Panels"      value={lead.panels} />}
-              {lead.type         && <Detail label="Type"        value={lead.type} />}
-              {lead.size         && <Detail label="Size"        value={lead.size} />}
-              {lead.timeline     && <Detail label="Timeline"    value={lead.timeline} />}
+              {lead.levels        && <Detail label="Levels"     value={lead.levels} />}
+              {lead.roofType      && <Detail label="Roof"       value={lead.roofType} />}
+              {lead.bedrooms      && <Detail label="Bedrooms"   value={lead.bedrooms} />}
+              {lead.panels        && <Detail label="Panels"     value={lead.panels} />}
+              {lead.type          && <Detail label="Type"       value={lead.type} />}
+              {lead.size          && <Detail label="Size"       value={lead.size} />}
+              {lead.timeline      && <Detail label="Timeline"   value={lead.timeline} />}
+              {estimateText       && <Detail label="Est. Price" value={estimateText} />}
+              {lead.finalQuote    && <Detail label="Final Quote" value={`$${lead.finalQuote.toLocaleString()}`} />}
             </div>
+          )}
+
+          {/* PDF link */}
+          {lead.pdfUrl && (
+            <a
+              href={lead.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-800 font-semibold transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              View customer PDF
+            </a>
           )}
 
           {/* Customer photos */}

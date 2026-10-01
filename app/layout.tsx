@@ -159,8 +159,8 @@ export default function RootLayout({
                   priceRange: "$$",
                   areaServed: { "@type": "City", name: "Melbourne" },
                   sameAs: [
-                    "https://www.facebook.com/turfcleanpros",
-                    "https://www.instagram.com/turfcleanpros",
+                    "https://www.facebook.com/profile.php?id=61594866687026",
+                    "https://www.instagram.com/turfcleanpros.com.au?stkn=MXVlYWJva2JldDFnaA==",
                   ],
                 },
                 {

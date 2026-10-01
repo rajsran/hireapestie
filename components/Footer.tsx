@@ -69,13 +69,13 @@ export default function Footer() {
 
             {/* Social icons */}
             <div className="flex items-center gap-4 mt-5">
-              <a href="https://www.facebook.com/profile.php?id=61593748350975" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-white/40 hover:text-white transition-colors">
+              <a href="https://www.facebook.com/profile.php?id=61594866687026" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-white/40 hover:text-white transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
               <a href="#" aria-label="LinkedIn" className="text-white/40 hover:text-white transition-colors">
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a href="https://www.instagram.com/turfcleanpros/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-white/40 hover:text-white transition-colors">
+              <a href="https://www.instagram.com/turfcleanpros.com.au?stkn=MXVlYWJva2JldDFnaA==" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-white/40 hover:text-white transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
             </div>

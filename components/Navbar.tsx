@@ -76,7 +76,7 @@ export default function Navbar() {
             ))}
             <div className="flex items-center gap-4 pt-1">
               <a
-                href="https://www.instagram.com/turfcleanpros/"
+                href="https://www.instagram.com/turfcleanpros.com.au?stkn=MXVlYWJva2JldDFnaA=="
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -85,7 +85,7 @@ export default function Navbar() {
                 <Image src="/instagram.png" alt="Instagram" width={22} height={22} />
               </a>
               <a
-                href="https://www.facebook.com/profile.php?id=61593748350975"
+                href="https://www.facebook.com/profile.php?id=61594866687026"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
