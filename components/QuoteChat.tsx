@@ -240,20 +240,35 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                 <h3 className="font-display font-black text-[1.2rem] text-ink-900 mb-1">What service do you need?</h3>
                 <p className="text-ink-400 text-xs mb-4">Tap an option — we&apos;ll price it up instantly ⚡</p>
                 <div className="flex flex-col gap-2">
-                  {CONFIG.services.map(s => (
+                  {CONFIG.services.map((s, i) => (
                     <button
                       key={s.id}
                       onClick={() => { up({ serviceId: s.id, addons: [] }); go(2); }}
-                      className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-left hover:border-violet-400 hover:bg-violet-50 active:scale-[0.98] transition-all shadow-sm group"
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left active:scale-[0.98] transition-all group ${
+                        i === 0
+                          ? "bg-violet-50 border-2 border-violet-400 shadow-violet ring-2 ring-violet-400/20 hover:border-violet-500 hover:shadow-[0_6px_28px_0_rgba(26,107,60,0.45)]"
+                          : "bg-white border border-gray-200 shadow-sm hover:border-violet-400 hover:bg-violet-50"
+                      }`}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0 text-lg group-hover:bg-violet-100 transition-colors">
-                        {s.emoji}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg transition-colors ${
+                        i === 0
+                          ? "bg-violet-600 border border-violet-700 group-hover:bg-violet-700"
+                          : "bg-violet-50 border border-violet-100 group-hover:bg-violet-100"
+                      }`}>
+                        <span className={i === 0 ? "grayscale-0 brightness-200" : ""}>{s.emoji}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-ink-900 text-sm leading-tight">{s.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-ink-900 text-sm leading-tight">{s.name}</p>
+                          {i === 0 && (
+                            <span className="shrink-0 text-[10px] font-bold bg-violet-600 text-white px-1.5 py-0.5 rounded-full leading-none">
+                              Popular
+                            </span>
+                          )}
+                        </div>
                         <p className="text-ink-400 text-[11px] mt-0.5 leading-tight">{s.sub}</p>
                       </div>
-                      <span className="text-violet-600 font-bold text-xs whitespace-nowrap">{s.from}</span>
+                      <span className={`font-bold text-xs whitespace-nowrap ${i === 0 ? "text-violet-600" : "text-violet-600"}`}>{s.from}</span>
                     </button>
                   ))}
                 </div>
