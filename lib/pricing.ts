@@ -1,3 +1,8 @@
+export interface QuoteLineItem {
+  description: string;
+  price: string;
+}
+
 export interface QuoteLead {
   service?: string;
   turfSize?: string;
@@ -18,6 +23,11 @@ export interface QuoteLead {
   notes?: string;
   photoUrl?: string;
   photoUrls?: string[];
+  // Wizard-computed fields
+  areaM2?: number;
+  billingPeriod?: string;
+  estimatedTotal?: number;
+  quoteLineItems?: QuoteLineItem[];
 }
 
 const TURF_SIZE_PRICING: Record<string, { low: number; high: number; note?: string }> = {

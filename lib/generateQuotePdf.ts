@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 import path from "path";
 import { QuoteLead, calcEstimate, isTurfService, calcTurfEstimate } from "./pricing";
@@ -125,6 +125,34 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     color: "#0D1A12",
     flex: 1,
+  },
+  tableCellRight: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: "#1A6B3C",
+    textAlign: "right",
+    width: 80,
+  },
+  tableTotal: {
+    flexDirection: "row",
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    backgroundColor: "#1A6B3C",
+    borderRadius: 4,
+    marginTop: 2,
+  },
+  tableTotalLabel: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    color: "#ffffff",
+    flex: 1,
+  },
+  tableTotalValue: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    color: "#ffffff",
+    textAlign: "right",
+    width: 80,
   },
 
   // Estimate box
@@ -266,11 +294,13 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
   const bookingTimeStr = booking?.bookingTime || null;
   const quoteNum = `GCF-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
 
+  const hasLineItems = lead.quoteLineItems && lead.quoteLineItems.length > 0;
   const jobDetails = [
-    { label: "Service",        value: lead.service       ?? "—" },
-    ...(lead.turfSize     ? [{ label: "Turf Size",     value: lead.turfSize }]     : []),
-    ...(lead.serviceDetail ? [{ label: "Treatment",    value: lead.serviceDetail }] : []),
-    { label: "Suburb",         value: lead.suburb        ?? "—" },
+    { label: "Service",      value: lead.service  ?? "—" },
+    ...(lead.areaM2        ? [{ label: "Area",        value: `${lead.areaM2} m²` }] : lead.turfSize ? [{ label: "Turf Size", value: lead.turfSize }] : []),
+    ...(lead.billingPeriod ? [{ label: "Billing",     value: lead.billingPeriod }]   : []),
+    ...(lead.serviceDetail ? [{ label: "Treatment",   value: lead.serviceDetail }]   : []),
+    { label: "Suburb",       value: lead.suburb   ?? "—" },
   ];
 
   return (
@@ -350,6 +380,31 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
           ),
         ),
 
+        // ── Line-item Pricing Table (wizard flow) ──
+        hasLineItems
+          ? React.createElement(View, { style: { ...styles.table, marginBottom: 20 } },
+              React.createElement(Text, { style: styles.sectionTitle }, "Pricing Breakdown"),
+              React.createElement(View, { style: styles.tableHeader },
+                React.createElement(Text, { style: { ...styles.tableHeaderText, flex: 1 } }, "Description"),
+                React.createElement(Text, { style: { ...styles.tableHeaderText, width: 80, textAlign: "right" } }, "Price"),
+              ),
+              ...(lead.quoteLineItems ?? []).map(({ description, price }, i) =>
+                React.createElement(View, { key: i, style: [styles.tableRow, i % 2 === 1 ? styles.tableRowAlt : {}] },
+                  React.createElement(Text, { style: { ...styles.tableCell, flex: 1 } }, description),
+                  React.createElement(Text, { style: styles.tableCellRight }, price),
+                )
+              ),
+              lead.estimatedTotal != null
+                ? React.createElement(View, { style: styles.tableTotal },
+                    React.createElement(Text, { style: styles.tableTotalLabel }, "Total"),
+                    React.createElement(Text, { style: styles.tableTotalValue },
+                      `$${lead.estimatedTotal.toLocaleString()}`
+                    ),
+                  )
+                : null,
+            )
+          : null,
+
         // ── Estimate / Final Quote ──
         finalAmount != null
           ? React.createElement(View, { style: { ...styles.estimateBox, backgroundColor: "#1b5e20" } },
@@ -361,24 +416,34 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
                 "This is your confirmed fixed price · No hidden costs"
               ),
             )
-          : estimate
+          : lead.estimatedTotal != null
             ? React.createElement(View, { style: styles.estimateBox },
-                React.createElement(Text, { style: styles.estimateLabel }, "Price Estimate"),
+                React.createElement(Text, { style: styles.estimateLabel }, "Estimated Total"),
                 React.createElement(Text, { style: styles.estimateAmount },
-                  estimate.low === estimate.high
-                    ? `$${estimate.low.toLocaleString()}`
-                    : `$${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}`
+                  `$${lead.estimatedTotal.toLocaleString()}`
                 ),
                 React.createElement(Text, { style: styles.estimateNote },
-                  `Starting price · Final quote confirmed on-site`
+                  "Price based on details provided · Final confirmed on-site"
                 ),
               )
-            : React.createElement(View, { style: styles.noEstimateBox },
-                React.createElement(Text, { style: styles.noEstimateTitle }, "Free On-Site Inspection Required"),
-                React.createElement(Text, { style: styles.noEstimateNote },
-                  "We'll visit your property, measure up, and provide a fixed accurate quote — no obligation."
+            : estimate
+              ? React.createElement(View, { style: styles.estimateBox },
+                  React.createElement(Text, { style: styles.estimateLabel }, "Price Estimate"),
+                  React.createElement(Text, { style: styles.estimateAmount },
+                    estimate.low === estimate.high
+                      ? `$${estimate.low.toLocaleString()}`
+                      : `$${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}`
+                  ),
+                  React.createElement(Text, { style: styles.estimateNote },
+                    "Starting price · Final quote confirmed on-site"
+                  ),
+                )
+              : React.createElement(View, { style: styles.noEstimateBox },
+                  React.createElement(Text, { style: styles.noEstimateTitle }, "Free On-Site Inspection Required"),
+                  React.createElement(Text, { style: styles.noEstimateNote },
+                    "We'll visit your property, measure up, and provide a fixed accurate quote — no obligation."
+                  ),
                 ),
-              ),
 
         // ── Booking Date ──
         bookingDateStr

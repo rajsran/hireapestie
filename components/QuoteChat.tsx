@@ -42,7 +42,7 @@ interface St {
   area: number;
   addons: string[];
   billing: "quarterly" | "annual";
-  name: string; phone: string; suburb: string; notes: string;
+  name: string; email: string; phone: string; suburb: string; postcode: string; notes: string;
 }
 
 interface PhotoEntry {
@@ -54,7 +54,7 @@ interface PhotoEntry {
 
 const INIT: St = {
   step: 1, serviceId: "", area: CONFIG.sliderMin, addons: [], billing: "quarterly",
-  name: "", phone: "", suburb: "", notes: "",
+  name: "", email: "", phone: "", suburb: "", postcode: "", notes: "",
 };
 
 export interface QuoteChatProps { isOpen: boolean; onClose: () => void; }
@@ -89,15 +89,57 @@ const fmt = (n: number) => "$" + n.toLocaleString("en-AU");
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   const [st, setSt]             = useState<St>(INIT);
-  const [errs, setErrs]               = useState({ name: false, phone: false, suburb: false });
+  const [errs, setErrs]               = useState({ name: false, email: false, phone: false, suburb: false });
   const [submitting, setSub]          = useState(false);
   const [photoEntries, setPhotoEntries] = useState<PhotoEntry[]>([]);
   const scrollRef                     = useRef<HTMLDivElement>(null);
 
+  // Suburb postcode lookup
+  const [suburbQuery, setSuburbQuery]     = useState("");
+  const [suburbOptions, setSuburbOptions] = useState<string[]>([]);
+  const [suburbLoading, setSuburbLoading] = useState(false);
+  const [showSuburbDrop, setShowSuburbDrop] = useState(false);
+  const suburbRef = useRef<HTMLDivElement>(null);
+
+  const handleSuburbInput = async (val: string) => {
+    // Only allow digits for postcode entry; ignore non-numeric
+    const digits = val.replace(/\D/g, "").slice(0, 4);
+    setSuburbQuery(digits);
+    setShowSuburbDrop(false);
+    setSuburbOptions([]);
+    up({ suburb: "", postcode: digits });
+    if (errs.suburb) setErrs(p => ({ ...p, suburb: false }));
+    if (digits.length === 4) {
+      setSuburbLoading(true);
+      try {
+        const res = await fetch(`/api/suburb?postcode=${digits}`);
+        const json = await res.json() as { suburbs: string[] };
+        const list = json.suburbs ?? [];
+        if (list.length === 1) {
+          // Single match — auto-fill immediately
+          setSuburbQuery(list[0]);
+          up({ suburb: list[0], postcode: digits });
+          setErrs(p => ({ ...p, suburb: false }));
+        } else if (list.length > 1) {
+          setSuburbOptions(list);
+          setShowSuburbDrop(true);
+        }
+      } catch { /* silent */ }
+      finally { setSuburbLoading(false); }
+    }
+  };
+
+  const selectSuburb = (name: string) => {
+    setSuburbQuery(name);
+    up({ suburb: name });
+    setShowSuburbDrop(false);
+    if (errs.suburb) setErrs(p => ({ ...p, suburb: false }));
+  };
+
   const up  = (patch: Partial<St>) => setSt(prev => ({ ...prev, ...patch }));
   const stl = () => setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 60);
   const go  = (step: number) => { up({ step }); stl(); };
-  const reset = () => { setSt(INIT); setErrs({ name: false, phone: false, suburb: false }); setSub(false); setPhotoEntries([]); };
+  const reset = () => { setSt(INIT); setErrs({ name: false, email: false, phone: false, suburb: false }); setSub(false); setPhotoEntries([]); setSuburbQuery(""); setSuburbOptions([]); setShowSuburbDrop(false); };
 
   const handlePhotoSelect = async (fileList: FileList | File[]) => {
     const files = Array.from(fileList).slice(0, 6 - photoEntries.length);
@@ -130,20 +172,42 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   const sliderBg  = `linear-gradient(to right,#1A6B3C ${sliderPct}%,#E5E7EB ${sliderPct}%)`;
 
   const validateAndContinue = () => {
-    const e = { name: !st.name.trim(), phone: !st.phone.trim(), suburb: !st.suburb.trim() };
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(st.email.trim());
+    const e = { name: !st.name.trim(), email: !emailOk, phone: !st.phone.trim(), suburb: !st.suburb.trim() };
     setErrs(e);
-    if (!e.name && !e.phone && !e.suburb) go(4);
+    if (!e.name && !e.email && !e.phone && !e.suburb) go(4);
   };
 
   const handleSubmit = async () => {
     setSub(true);
     const uploadedUrls = photoEntries.filter(p => p.url).map(p => p.url!);
+
+    // Build line items for the PDF
+    const quoteLineItems: { description: string; price: string }[] = [];
+    if (svc?.isMaintenance) {
+      const maintCost = isCustom ? null : maintPrice(st.area, st.billing);
+      quoteLineItems.push({
+        description: `Scheduled Maintenance Plan (${st.billing === "quarterly" ? "Quarterly · 10% off" : "Prepaid Annual · 15% off"})`,
+        price: maintCost ? fmt(maintCost) + "/visit" : "Custom quote",
+      });
+    } else {
+      const basePrice = isCustom ? null : svcPrice(st.serviceId, st.area);
+      quoteLineItems.push({ description: svc?.name ?? "", price: basePrice ? fmt(basePrice) : "Custom quote" });
+      for (const id of st.addons) {
+        const addon = CONFIG.addons.find(a => a.id === id);
+        const ap = isCustom ? null : addonBundled(id, st.area);
+        quoteLineItems.push({ description: `${addon?.name} (add-on · 40% off)`, price: ap ? fmt(ap) : "Custom quote" });
+      }
+    }
+
     const body = {
-      service: svc?.name, area: st.area + "m²",
-      addons: st.addons.map(id => CONFIG.addons.find(a => a.id === id)?.name),
-      billing: svc?.isMaintenance ? st.billing : undefined,
-      estimatedPrice: isCustom ? "Custom quote" : ttl ? fmt(ttl) : undefined,
-      name: st.name, phone: st.phone, suburb: st.suburb,
+      service: svc?.name,
+      turfSize: st.area + "m²",
+      areaM2: st.area,
+      billingPeriod: svc?.isMaintenance ? (st.billing === "quarterly" ? "Quarterly (10% off)" : "Prepaid Annual (15% off)") : undefined,
+      estimatedTotal: isCustom ? undefined : ttl ?? undefined,
+      quoteLineItems,
+      name: st.name, email: st.email, phone: st.phone, suburb: st.suburb, postcode: st.postcode || undefined,
       notes: st.notes || undefined,
       photoUrls: uploadedUrls.length > 0 ? uploadedUrls : undefined,
     };
@@ -391,6 +455,17 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                   </div>
                   <div>
                     <input
+                      type="email"
+                      value={st.email}
+                      onChange={e => { up({ email: e.target.value }); if (errs.email) setErrs(p => ({ ...p, email: false })); }}
+                      placeholder="Email * (we'll send your quote PDF here)"
+                      autoComplete="email"
+                      className={`w-full bg-white border rounded-2xl px-4 py-3.5 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all ${errs.email ? "border-red-400" : "border-gray-200 focus:border-violet-400"}`}
+                    />
+                    {errs.email && <p className="text-red-500 text-xs mt-1 ml-1">Enter a valid email address</p>}
+                  </div>
+                  <div>
+                    <input
                       type="tel"
                       value={st.phone}
                       onChange={e => { up({ phone: e.target.value }); if (errs.phone) setErrs(p => ({ ...p, phone: false })); }}
@@ -400,16 +475,64 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                     />
                     {errs.phone && <p className="text-red-500 text-xs mt-1 ml-1">Enter a phone number</p>}
                   </div>
-                  <div>
-                    <input
-                      type="text"
-                      value={st.suburb}
-                      onChange={e => { up({ suburb: e.target.value }); if (errs.suburb) setErrs(p => ({ ...p, suburb: false })); }}
-                      placeholder="Suburb * (e.g. Bonnie Brook)"
-                      autoComplete="address-level2"
-                      className={`w-full bg-white border rounded-2xl px-4 py-3.5 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all ${errs.suburb ? "border-red-400" : "border-gray-200 focus:border-violet-400"}`}
-                    />
-                    {errs.suburb && <p className="text-red-500 text-xs mt-1 ml-1">Enter your suburb</p>}
+                  <div className="relative" ref={suburbRef}>
+                    <div className="relative">
+                      {st.suburb ? (
+                        /* Suburb selected — show pill with suburb name + change button */
+                        <div className={`w-full flex items-center justify-between bg-white border-2 border-violet-400 rounded-2xl px-4 py-3.5 ${errs.suburb ? "border-red-400" : ""}`}>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <CheckCircle2 className="w-4 h-4 text-violet-500 shrink-0" />
+                            <span className="text-sm font-semibold text-ink-900 truncate">{st.suburb}</span>
+                            {st.postcode && <span className="text-xs text-ink-300 shrink-0">{st.postcode}</span>}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => { setSuburbQuery(""); up({ suburb: "", postcode: "" }); setSuburbOptions([]); }}
+                            className="text-ink-300 hover:text-ink-600 text-xs font-medium transition-colors shrink-0 ml-2"
+                          >
+                            Change
+                          </button>
+                        </div>
+                      ) : (
+                        /* Postcode entry */
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="\d*"
+                          maxLength={4}
+                          value={suburbQuery}
+                          onChange={e => handleSuburbInput(e.target.value)}
+                          onBlur={() => setTimeout(() => setShowSuburbDrop(false), 150)}
+                          placeholder="Postcode * (e.g. 3029)"
+                          autoComplete="postal-code"
+                          className={`w-full bg-white border rounded-2xl px-4 py-3.5 pr-10 text-sm text-ink-900 placeholder-ink-300 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all ${errs.suburb ? "border-red-400" : "border-gray-200 focus:border-violet-400"}`}
+                        />
+                      )}
+                      {suburbLoading && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <Loader2 className="w-4 h-4 text-violet-400 animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                    {showSuburbDrop && suburbOptions.length > 1 && (
+                      <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-2xl shadow-card-lg overflow-hidden">
+                        <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold text-ink-300 uppercase tracking-wide">
+                          Select your suburb — {st.postcode}
+                        </p>
+                        {suburbOptions.map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onMouseDown={() => selectSuburb(s)}
+                            className="w-full text-left px-4 py-3 text-sm text-ink-900 hover:bg-violet-50 hover:text-violet-700 transition-colors border-t border-gray-100 first:border-0 flex items-center justify-between"
+                          >
+                            <span>{s}</span>
+                            <span className="text-ink-300 text-xs">{st.postcode}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {errs.suburb && <p className="text-red-500 text-xs mt-1 ml-1">Enter your postcode to find your suburb</p>}
                   </div>
                   <div>
                     {photoEntries.length > 0 && (
@@ -492,8 +615,9 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                       { k: "Price per visit", v: isCustom ? "Custom quote" : fmt(maintPrice(st.area, st.billing)), green: !isCustom },
                     ]),
                     { k: "Name",   v: st.name },
+                    { k: "Email",  v: st.email },
                     { k: "Phone",  v: st.phone },
-                    { k: "Suburb", v: st.suburb },
+                    { k: "Suburb", v: [st.suburb, st.postcode].filter(Boolean).join(", ") },
                     ...(st.notes ? [{ k: "Notes", v: st.notes }] : []),
                   ].map(({ k, v, green }, i) => (
                     <div key={i} className="flex items-start justify-between gap-3 px-4 py-3 border-b border-gray-100 last:border-0">
@@ -520,7 +644,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                     Thanks{st.name ? `, ${st.name.split(" ")[0]}` : ""}!
                   </h3>
                   <p className="text-ink-400 text-sm leading-relaxed max-w-xs">
-                    We&apos;ve received your request and will call you shortly to confirm.
+                    We&apos;ve received your request and sent your quote PDF to <strong className="text-ink-700">{st.email}</strong>. We&apos;ll call you shortly to confirm.
                   </p>
                   {st.phone && (
                     <div className="mt-5 bg-violet-50 border border-violet-100 rounded-2xl px-6 py-3 text-center">

@@ -15,6 +15,12 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
         <p style="font-weight:bold;color:#166534;margin:0 0 6px;">Free On-Site Consultation</p>
         <p style="color:#4b7c5a;font-size:12px;margin:0;">We'll visit, discuss your vision, and provide a fixed quote — no obligation.</p>
       </div>`
+    : lead.estimatedTotal != null
+      ? `<div style="background:#125230;border-radius:10px;padding:20px;text-align:center;margin:20px 0;">
+          <p style="color:#9ca3af;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;">Estimated Total</p>
+          <p style="color:#ffffff;font-size:32px;font-weight:bold;margin:0 0 4px;">$${lead.estimatedTotal.toLocaleString()}</p>
+          <p style="color:#6b7280;font-size:12px;margin:0;">Based on details provided · Final confirmed on-site</p>
+        </div>`
     : estimate
       ? `<div style="background:#1a1a2e;border-radius:10px;padding:20px;text-align:center;margin:20px 0;">
           <p style="color:#9ca3af;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;">Starting Price</p>
@@ -29,17 +35,18 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
   const jobRows = isLandscaping
     ? [["Service", lead.service]]
     : isTurf
-      ? lead.service === "Bird Proofing Mesh"
+      ? lead.areaM2
         ? [
-            ["Service", lead.service],
-            ["Panels",  lead.panels],
+            ["Service",  lead.service],
+            ["Area",     `${lead.areaM2} m²`],
+            ...(lead.billingPeriod ? [["Billing", lead.billingPeriod]] : []),
+            ...(lead.quoteLineItems && lead.quoteLineItems.length > 1
+              ? lead.quoteLineItems.slice(1).map(li => [`+ ${li.description}`, li.price])
+              : []),
           ]
-        : [
-            ["Service",   lead.service],
-            ["Levels",    lead.levels],
-            ["Roof Type", lead.roofType],
-            ["Bedrooms",  lead.bedrooms],
-          ]
+        : lead.service === "Bird Proofing Mesh"
+          ? [["Service", lead.service], ["Panels", lead.panels]]
+          : [["Service", lead.service], ["Area", lead.turfSize], ["Treatment", lead.serviceDetail]]
       : [["Service", lead.type || lead.service], ["Size", lead.size], ["Timeline", lead.timeline]];
 
   return `
