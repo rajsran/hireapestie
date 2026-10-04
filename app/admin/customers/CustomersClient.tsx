@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, Phone, Mail, MapPin, FileText, Calendar } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Users, Phone, Mail, MapPin, FileText, Calendar, Trash2 } from "lucide-react";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-AU", {
@@ -29,6 +31,27 @@ export default function CustomersClient({
   customers: Customer[];
   error?: string;
 }) {
+  const router = useRouter();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+
+  async function handleDelete(c: Customer) {
+    const label = c.name || c.email || "this customer";
+    if (!confirm(`Delete ${label}? This also deletes their ${c.quote_count} quote(s) and all their invoices. This cannot be undone.`)) return;
+
+    setDeletingId(c.id);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/admin/customers?id=${encodeURIComponent(c.id)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      router.refresh();
+    } catch {
+      setDeleteError("Could not delete customer. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pt-8">
       <div className="max-w-2xl mx-auto px-4 py-6">
@@ -47,9 +70,9 @@ export default function CustomersClient({
           </Link>
         </div>
 
-        {error && (
+        {(error || deleteError) && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-red-600">{error || deleteError}</p>
           </div>
         )}
 
@@ -113,6 +136,14 @@ export default function CustomersClient({
                     >
                       + Invoice
                     </Link>
+                    <button
+                      onClick={() => handleDelete(c)}
+                      disabled={deletingId === c.id}
+                      className="inline-flex items-center gap-1 ml-1 text-[10px] font-semibold bg-red-50 text-red-600 border border-red-100 rounded-lg px-2 py-1 hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      {deletingId === c.id ? "Deleting…" : "Delete"}
+                    </button>
                   </div>
                 </div>
               </div>

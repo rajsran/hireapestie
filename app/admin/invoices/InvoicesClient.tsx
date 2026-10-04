@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, FileText, CheckCircle2, Send, Clock,
-  ChevronDown, ChevronUp, Plus, X, Loader2,
+  ChevronDown, ChevronUp, Plus, X, Loader2, Trash2,
 } from "lucide-react";
 
 function formatDate(iso: string) {
@@ -84,17 +84,48 @@ function InvoiceCard({
   invoice,
   onStatusChange,
   onSend,
+  onDelete,
   onToast,
 }: {
   invoice: Invoice;
   onStatusChange: (id: string, status: string) => void;
   onSend: (id: string) => void;
+  onDelete: (id: string) => void;
   onToast: (msg: string, type: "loading" | "success" | "error") => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [sending, setSending] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+
+  async function handleDelete() {
+    const warning = invoice.status === "paid"
+      ? "This invoice is marked as PAID. Delete it anyway? This cannot be undone."
+      : invoice.status === "sent"
+        ? "This invoice has already been sent to the customer. Delete it anyway? This cannot be undone."
+        : "Delete this invoice? This cannot be undone.";
+    if (!confirm(`${invoice.invoice_number}: ${warning}`)) return;
+
+    setDeleting(true);
+    setError("");
+    onToast("Deleting invoice…", "loading");
+    try {
+      const res = await fetch(`/api/admin/invoices?id=${encodeURIComponent(invoice.id)}`, { method: "DELETE" });
+      if (res.ok) {
+        onDelete(invoice.id);
+        onToast("Invoice deleted", "success");
+      } else {
+        setError("Failed to delete");
+        onToast("Failed to delete invoice", "error");
+        setDeleting(false);
+      }
+    } catch {
+      setError("Network error");
+      onToast("Network error — please try again", "error");
+      setDeleting(false);
+    }
+  }
 
   async function handleSend() {
     if (!confirm("Send this invoice to the customer?")) return;
@@ -232,6 +263,14 @@ function InvoiceCard({
                 PDF
               </a>
             )}
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-3 flex items-center gap-1 text-xs font-semibold text-red-600 hover:bg-red-50 border border-red-200 rounded-lg py-2.5 transition-colors disabled:opacity-40"
+            >
+              {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              Delete
+            </button>
           </div>
         </div>
       )}
@@ -373,6 +412,10 @@ export default function InvoicesClient({
     } finally {
       setCreating(false);
     }
+  }
+
+  function handleDelete(id: string) {
+    setInvoices(inv => inv.filter(i => i.id !== id));
   }
 
   function handleStatusChange(id: string, status: string) {
@@ -707,6 +750,7 @@ export default function InvoicesClient({
                 invoice={inv}
                 onStatusChange={handleStatusChange}
                 onSend={handleSend}
+                onDelete={handleDelete}
                 onToast={showToast}
               />
             ))}

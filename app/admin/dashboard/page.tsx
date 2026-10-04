@@ -9,7 +9,10 @@ export const dynamic = 'force-dynamic';
 export default async function AdminDashboardPage() {
   if (!(await isAdminAuthenticated())) redirect('/admin/login');
 
-  await initDb();
-  const projects = await listProjects();
+  // Query first; only run migrations if the projects table doesn't exist yet.
+  const projects = await listProjects().catch(async () => {
+    await initDb();
+    return listProjects();
+  });
   return <AdminDashboardClient projects={projects} />;
 }

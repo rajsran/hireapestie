@@ -20,7 +20,7 @@ const services = [
       "Before & after photos provided",
       "Residential & commercial turf",
     ],
-    pricing: "From $150 (up to ~25m²) · $6–8/m² for larger areas",
+    pricing: "From $199 (up to ~25m²) · $6–8/m² for larger areas",
     image: "/SyntheticTurf%20DeepClean.jpeg",
   },
   {

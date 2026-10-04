@@ -16,6 +16,18 @@ export function initDb(): Promise<void> {
   return _initPromise;
 }
 
+// Fast path for reads: run the query straight away and only run migrations
+// (and retry once) if it fails, e.g. because a table doesn't exist yet.
+export async function withDb<T>(fn: (sql: ReturnType<typeof getDb>) => Promise<T>): Promise<T> {
+  const sql = getDb();
+  try {
+    return await fn(sql);
+  } catch {
+    await initDb();
+    return fn(sql);
+  }
+}
+
 async function _runMigrations(): Promise<void> {
   const sql = getDb();
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
-import { getDb, initDb } from "@/lib/db";
+import { getDb, initDb, withDb } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -10,10 +10,7 @@ export async function GET() {
   }
 
   try {
-    await initDb();
-    const sql = getDb();
-
-    const invoices = await sql`
+    const invoices = await withDb(sql => sql`
       SELECT
         i.*,
         c.name  AS customer_name,
@@ -26,7 +23,7 @@ export async function GET() {
       LEFT JOIN customers c ON c.id = i.customer_id
       LEFT JOIN quotes    q ON q.id = i.quote_id
       ORDER BY i.created_at DESC
-    `;
+    `);
 
     return NextResponse.json({ invoices });
   } catch (err) {
@@ -119,6 +116,24 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Invoice update error:", err);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const id = new URL(req.url).searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  try {
+    const sql = getDb();
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Invoice delete error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
