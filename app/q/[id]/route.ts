@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://turfcleanpros.com.au";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hireapestie.com.au";
 
   if (!id || !/^[a-z0-9]{4,12}$/i.test(id)) {
     return NextResponse.redirect(siteUrl);

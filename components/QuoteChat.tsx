@@ -169,7 +169,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
   const isCustom = st.area > CONFIG.customAt;
   const ttl      = total(st);
   const sliderPct = ((st.area - CONFIG.sliderMin) / (CONFIG.sliderMax - CONFIG.sliderMin)) * 100;
-  const sliderBg  = `linear-gradient(to right,#1A6B3C ${sliderPct}%,#E5E7EB ${sliderPct}%)`;
+  const sliderBg  = `linear-gradient(to right,#5A8F1C ${sliderPct}%,#E5E7EB ${sliderPct}%)`;
 
   const validateAndContinue = () => {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(st.email.trim());
@@ -290,7 +290,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                 <div className="px-5 pb-8 pt-3 border-t border-gray-100 shrink-0">
                   <button
                     onClick={() => go(1)}
-                    className="btn-pulse w-full py-4 bg-gradient-to-b from-violet-500 to-violet-700 text-white font-bold rounded-2xl text-base hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all shadow-violet"
+                    className="btn-pulse w-full py-4 bg-gradient-to-b from-accent-400 to-accent-600 text-white font-bold rounded-2xl text-base hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all shadow-[0_4px_20px_rgba(245,138,31,0.35)]"
                   >
                     Get a Quote
                   </button>
@@ -310,7 +310,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                       onClick={() => { up({ serviceId: s.id, addons: [] }); go(2); }}
                       className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left active:scale-[0.98] transition-all group ${
                         i === 0
-                          ? "bg-violet-50 border-2 border-violet-400 shadow-violet ring-2 ring-violet-400/20 hover:border-violet-500 hover:shadow-[0_6px_28px_0_rgba(26,107,60,0.45)]"
+                          ? "bg-violet-50 border-2 border-violet-400 shadow-violet ring-2 ring-violet-400/20 hover:border-violet-500 hover:shadow-[0_6px_28px_0_rgba(31,59,115,0.45)]"
                           : "bg-white border border-gray-200 shadow-sm hover:border-violet-400 hover:bg-violet-50"
                       }`}
                     >
@@ -325,7 +325,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-ink-900 text-sm leading-tight">{s.name}</p>
                           {i === 0 && (
-                            <span className="shrink-0 text-[10px] font-bold bg-violet-600 text-white px-1.5 py-0.5 rounded-full leading-none">
+                            <span className="shrink-0 text-[10px] font-bold bg-accent-500 text-white px-1.5 py-0.5 rounded-full leading-none">
                               Popular
                             </span>
                           )}
@@ -657,7 +657,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                 <div className="px-5 pb-8 pt-3 border-t border-gray-100 flex flex-col gap-2 shrink-0">
                   <a
                     href={`tel:${CONFIG.phone.replace(/\s/g, "")}`}
-                    className="w-full py-4 flex items-center justify-center gap-2 bg-violet-600 text-white font-bold rounded-2xl text-sm hover:bg-violet-700 active:scale-[0.98] transition-all"
+                    className="w-full py-4 flex items-center justify-center gap-2 bg-accent-500 text-white font-bold rounded-2xl text-sm hover:bg-accent-600 active:scale-[0.98] transition-all"
                   >
                     <Phone className="w-4 h-4" /> Call Now: {CONFIG.phone}
                   </a>
@@ -703,7 +703,7 @@ export default function QuoteChat({ isOpen, onClose }: QuoteChatProps) {
                     handleSubmit
                   }
                   disabled={submitting}
-                  className="w-full py-4 bg-gradient-to-b from-violet-500 to-violet-700 text-white font-bold rounded-2xl text-sm hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-violet"
+                  className="w-full py-4 bg-gradient-to-b from-accent-400 to-accent-600 text-white font-bold rounded-2xl text-sm hover:from-violet-600 hover:to-violet-800 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(245,138,31,0.35)]"
                 >
                   {submitting
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>

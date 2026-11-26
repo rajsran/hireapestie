@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { posts } from "@/lib/blog";
 
-const BASE = "https://www.turfcleanpros.com.au";
+const BASE = "https://hireapestie.com.au";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -46,5 +47,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${BASE}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    ...posts.map((p) => ({
+      url: `${BASE}/blog/${p.slug}`,
+      lastModified: new Date(p.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ];
 }

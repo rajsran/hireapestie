@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         await saveLead({ ...lead, accepted: true, acceptedAt: new Date().toISOString() });
         await sendSms(
           phone,
-          `Great news! Your quote of $${lead.finalQuote} has been accepted. Our team will be in touch shortly to schedule your job. Thanks for choosing Turf Clean Pros!`,
+          `Great news! Your quote of $${lead.finalQuote} has been accepted. Our team will be in touch shortly to schedule your job. Thanks for choosing Hire a Pestie!`,
         );
       }
     } else if (CANCEL_KEYWORDS.has(keyword)) {
@@ -70,13 +70,13 @@ export async function POST(request: NextRequest) {
         await saveLead({ ...lead, accepted: false });
         await sendSms(
           phone,
-          `No problem! If you'd like a new quote in the future, visit turfcleanpros.com.au or call us anytime.`,
+          `No problem! If you'd like a new quote in the future, visit hireapestie.com.au or call us anytime.`,
         );
       }
     } else if (STOP_KEYWORDS.has(keyword)) {
-      await sendSms(phone, "You've been unsubscribed from Turf Clean Pros SMS updates.");
+      await sendSms(phone, "You've been unsubscribed from Hire a Pestie SMS updates.");
     } else if (START_KEYWORDS.has(keyword)) {
-      await sendSms(phone, "Welcome back! You're subscribed to Turf Clean Pros SMS updates.");
+      await sendSms(phone, "Welcome back! You're subscribed to Hire a Pestie SMS updates.");
     }
     // All other replies: silently acknowledge
   } catch (err) {

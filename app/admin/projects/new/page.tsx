@@ -148,7 +148,7 @@ export default function NewProjectPage() {
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              placeholder="e.g. Residential Turf Clean — Mulgrave"
+              placeholder="e.g. Residential Pest Treatment — Mulgrave"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-violet-500"
               required
             />
@@ -240,7 +240,7 @@ export default function NewProjectPage() {
           <button
             type="submit"
             disabled={saving || !title.trim() || !allUploaded || photos.some(p => p.status === "error")}
-            className="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-4 bg-accent-500 hover:bg-accent-600 text-white font-bold rounded-xl text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving…" : uploading ? "Waiting for uploads…" : "Save Project"}
           </button>

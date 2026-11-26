@@ -41,7 +41,7 @@ export default function GalleryPage() {
           <p className="text-ink-400 text-base mb-6">Photos coming soon. Check back after your next job!</p>
           <Link
             href="/contact"
-            className="px-8 py-4 bg-violet-600 text-white font-semibold rounded-xl text-sm shadow-violet hover:bg-violet-700 transition-colors"
+            className="px-8 py-4 bg-accent-500 text-white font-semibold rounded-xl text-sm shadow-[0_4px_20px_rgba(245,138,31,0.35)] hover:bg-accent-600 transition-colors"
           >
             Get a Free Quote
           </Link>

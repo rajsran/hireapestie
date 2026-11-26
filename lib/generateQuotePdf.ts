@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   page: {
     fontFamily: "Helvetica",
     fontSize: 10,
-    color: "#0D1A12",
+    color: "#0F172A",
     paddingTop: 48,
     paddingBottom: 60,
     paddingHorizontal: 48,
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     marginBottom: 36,
     paddingBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: "#1A6B3C",
+    borderBottomColor: "#5A8F1C",
   },
   logo: {
     width: 160,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   quoteNumber: {
     fontSize: 13,
     fontFamily: "Helvetica-Bold",
-    color: "#0D1A12",
+    color: "#0F172A",
   },
   quoteDate: {
     fontSize: 9,
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    color: "#1A6B3C",
+    color: "#5A8F1C",
     letterSpacing: 1.2,
     textTransform: "uppercase",
     marginBottom: 8,
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
-    color: "#0D1A12",
+    color: "#0F172A",
     flex: 1,
   },
 
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#1A6B3C",
+    backgroundColor: "#5A8F1C",
     paddingVertical: 7,
     paddingHorizontal: 12,
     borderRadius: 4,
@@ -123,13 +123,13 @@ const styles = StyleSheet.create({
   tableCellBold: {
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
-    color: "#0D1A12",
+    color: "#0F172A",
     flex: 1,
   },
   tableCellRight: {
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
-    color: "#1A6B3C",
+    color: "#5A8F1C",
     textAlign: "right",
     width: 80,
   },
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 9,
     paddingHorizontal: 12,
-    backgroundColor: "#1A6B3C",
+    backgroundColor: "#5A8F1C",
     borderRadius: 4,
     marginTop: 2,
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
 
   // Estimate box
   estimateBox: {
-    backgroundColor: "#125230",
+    backgroundColor: "#152B57",
     borderRadius: 8,
     padding: 20,
     marginBottom: 20,
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   noEstimateTitle: {
     fontSize: 12,
     fontFamily: "Helvetica-Bold",
-    color: "#0D1A12",
+    color: "#0F172A",
     marginBottom: 4,
   },
   noEstimateNote: {
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
 
   // Booking box
   bookingBox: {
-    backgroundColor: "#1A6B3C",
+    backgroundColor: "#5A8F1C",
     borderRadius: 8,
     padding: 14,
     marginBottom: 16,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   bookingBadge: {
     fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    color: "#1A6B3C",
+    color: "#5A8F1C",
     backgroundColor: "#ffffff",
     borderRadius: 4,
     paddingHorizontal: 8,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   footerRight: {
     fontSize: 8,
-    color: "#1A6B3C",
+    color: "#5A8F1C",
     fontFamily: "Helvetica-Bold",
     textAlign: "right",
     lineHeight: 1.5,
@@ -297,14 +297,14 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
   const hasLineItems = lead.quoteLineItems && lead.quoteLineItems.length > 0;
   const jobDetails = [
     { label: "Service",      value: lead.service  ?? "—" },
-    ...(lead.areaM2        ? [{ label: "Area",        value: `${lead.areaM2} m²` }] : lead.turfSize ? [{ label: "Turf Size", value: lead.turfSize }] : []),
+    ...(lead.areaM2        ? [{ label: "Area",        value: `${lead.areaM2} m²` }] : lead.turfSize ? [{ label: "Area", value: lead.turfSize }] : []),
     ...(lead.billingPeriod ? [{ label: "Billing",     value: lead.billingPeriod }]   : []),
     ...(lead.serviceDetail ? [{ label: "Treatment",   value: lead.serviceDetail }]   : []),
     { label: "Suburb",       value: lead.suburb   ?? "—" },
   ];
 
   return (
-    React.createElement(Document, { title: `Turf Clean Pros Quote — ${lead.name ?? "Customer"}` },
+    React.createElement(Document, { title: `Hire a Pestie Quote — ${lead.name ?? "Customer"}` },
       React.createElement(Page, { size: "A4", style: styles.page },
 
         // ── Header ──
@@ -344,7 +344,7 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
             React.createElement(Text, { style: styles.sectionTitle }, "From"),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Company"),
-              React.createElement(Text, { style: styles.infoValue }, "Turf Clean Pros"),
+              React.createElement(Text, { style: styles.infoValue }, "Hire a Pestie"),
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "ABN"),
@@ -352,11 +352,11 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Contact"),
-              React.createElement(Text, { style: styles.infoValue }, "Turf Clean Pros Team"),
+              React.createElement(Text, { style: styles.infoValue }, "Hire a Pestie Team"),
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Phone"),
-              React.createElement(Text, { style: styles.infoValue }, "0433 240 617"),
+              React.createElement(Text, { style: styles.infoValue }, "0448 163 783"),
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Area"),
@@ -407,7 +407,7 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
 
         // ── Estimate / Final Quote ──
         finalAmount != null
-          ? React.createElement(View, { style: { ...styles.estimateBox, backgroundColor: "#1b5e20" } },
+          ? React.createElement(View, { style: { ...styles.estimateBox, backgroundColor: "#5A8F1C" } },
               React.createElement(Text, { style: styles.estimateLabel }, "Final Quote"),
               React.createElement(Text, { style: styles.estimateAmount },
                 `$${finalAmount.toLocaleString()}`
@@ -475,10 +475,10 @@ function QuotePdfDocument({ lead, estimate, finalAmount, booking }: {
         // ── Footer ──
         React.createElement(View, { style: styles.footer },
           React.createElement(Text, { style: styles.footerLeft },
-            `Turf Clean Pros · ABN ${COMPANY_ABN}\nBonnie Brook VIC 3335 · All Melbourne Suburbs`
+            `Hire a Pestie · ABN ${COMPANY_ABN}\nMelbourne · Geelong · Bendigo · Ballarat`
           ),
           React.createElement(Text, { style: styles.footerRight },
-            "0433 240 617\nadmin@turfcleanpros.com.au"
+            "0448 163 783\ninfo@hireapestie.com.au"
           ),
         ),
       )

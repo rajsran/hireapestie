@@ -16,9 +16,10 @@ function formatDate(iso: string) {
 }
 
 const SERVICES = [
-  "Residential Turf Cleaning",
-  "Commercial Turf Cleaning",
-  "Bird Proofing Mesh",
+  "Residential Pest Control",
+  "Commercial Pest Control",
+  "Pest Inspection",
+  "Pre-construction Pest Control",
   "Other",
 ] as const;
 
@@ -439,7 +440,7 @@ export default function InvoicesClient({
       {/* Global toast */}
       {toast && (
         <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-xl text-sm font-semibold transition-all
-          ${toast.type === "loading" ? "bg-[#1A6B3C] text-white" : ""}
+          ${toast.type === "loading" ? "bg-[#5A8F1C] text-white" : ""}
           ${toast.type === "success" ? "bg-green-600 text-white" : ""}
           ${toast.type === "error"   ? "bg-red-600 text-white" : ""}
         `}>

@@ -66,7 +66,7 @@ export default function HeroAdminClient({ initialUrls }: { initialUrls: string[]
         <button
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-2 px-5 py-3 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition-colors mb-6"
+          className="flex items-center gap-2 px-5 py-3 bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition-colors mb-6"
         >
           {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
           {uploading ? "Uploading…" : "Add Photos"}

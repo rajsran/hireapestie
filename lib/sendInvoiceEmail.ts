@@ -19,7 +19,7 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
 
   const jobRows = [
     ["Service",   invoice.service],
-    ["Turf Size", invoice.turfSize],
+    ["Area", invoice.turfSize],
     ["Treatment", invoice.serviceDetail],
   ].filter(([, v]) => v);
 
@@ -37,13 +37,13 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
   const customerHtml = `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e;">
     <div style="background:#1b2d6e;padding:28px 32px;border-radius:10px 10px 0 0;">
-      <img src="https://turfcleanpros.vercel.app/logo.png" alt="Turf Clean Pros" style="height:48px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />
+      <img src="https://hireapestie.com.au/logo.png" alt="Hire a Pestie" style="height:48px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />
       <p style="color:#a0b8d8;margin:0;font-size:13px;">Tax Invoice — ${invoice.invoiceNumber}</p>
     </div>
     <div style="background:#ffffff;padding:32px;border:1px solid #e5e7eb;border-top:none;">
       <p style="font-size:16px;margin:0 0 16px;">Hi ${firstName},</p>
       <p style="color:#374151;line-height:1.6;margin:0 0 20px;">
-        Please find your invoice attached. Thank you for choosing Turf Clean Pros!
+        Please find your invoice attached. Thank you for choosing Hire a Pestie!
       </p>
 
       ${jobTableHtml}
@@ -59,12 +59,12 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
       ${invoice.notes ? `<p style="color:#6b7280;font-size:13px;margin:0 0 16px;">${invoice.notes}</p>` : ""}
 
       <p style="color:#374151;line-height:1.6;margin:0;">
-        Questions? Call us on <strong>0433 240 617</strong> or reply to this email.
+        Questions? Call us on <strong>0448 163 783</strong> or reply to this email.
       </p>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
-      <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · ABN 27 700 387 079 · Bonnie Brook VIC 3335</p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;">Hire a Pestie · ABN 27 700 387 079 · Melbourne VIC</p>
+      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">info@hireapestie.com.au · 0448 163 783</p>
     </div>
   </div>`;
 
@@ -74,7 +74,7 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
     </div>`;
 
   const attachment = {
-    Name: `TurfCleanPros-Invoice-${invoice.invoiceNumber}.pdf`,
+    Name: `HireAPestie-Invoice-${invoice.invoiceNumber}.pdf`,
     Content: pdfBuffer.toString("base64"),
     ContentType: "application/pdf",
     ContentID: "",
@@ -84,7 +84,7 @@ export async function sendInvoiceEmail(invoice: InvoiceData, pdfBuffer: Buffer):
     {
       From: FROM_EMAIL,
       To: invoice.customerEmail,
-      Subject: `Tax Invoice ${invoice.invoiceNumber} — Turf Clean Pros`,
+      Subject: `Tax Invoice ${invoice.invoiceNumber} — Hire a Pestie`,
       HtmlBody: customerHtml,
       Attachments: [attachment],
       MessageStream: "outbound",

@@ -2,11 +2,11 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import PublicShell from "@/components/PublicShell";
 
-const SITE_URL = "https://www.turfcleanpros.com.au";
-const SITE_NAME = "Turf Clean Pros";
-const DEFAULT_TITLE = "Turf Clean Pros | Melbourne's #1 Turf Cleaning Service";
+const SITE_URL = "https://hireapestie.com.au";
+const SITE_NAME = "Hire a Pestie";
+const DEFAULT_TITLE = "Expert Pest Control Solutions in Melbourne | Hire A Pestie";
 const DEFAULT_DESC =
-  "Professional synthetic turf cleaning across all Melbourne suburbs. 4.9★ rated on Google. From $150. Call 0433 240 617.";
+  "Hire a Pestie — your pest inspection & control partner in Melbourne, Geelong, Bendigo and Ballarat. Eco-friendly, licensed, fully insured. Get a quote in minutes. Call 0448 163 783.";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -21,24 +21,17 @@ export const metadata: Metadata = {
   },
   description: DEFAULT_DESC,
   keywords: [
-    "turf cleaning Melbourne",
-    "turf cleaner Melbourne",
-    "synthetic turf cleaning Melbourne",
-    "artificial grass cleaning Melbourne",
-    "turf deep clean Melbourne",
-    "pet odour turf treatment Melbourne",
-    "residential turf cleaning",
-    "commercial turf cleaning",
-    "synthetic turf cleaning near me",
-    "moss algae removal synthetic turf",
-    "turf maintenance plan Melbourne",
-    "turf cleaning Melton",
-    "turf cleaning Tarneit",
-    "turf cleaning Werribee",
-    "turf cleaning Point Cook",
-    "turf cleaning Craigieburn",
-    "turf cleaning Narre Warren",
-    "how much does turf cleaning cost Melbourne",
+    "pest control Melbourne",
+    "pest inspection Melbourne",
+    "residential pest control Melbourne",
+    "commercial pest control Melbourne",
+    "pre-construction pest control",
+    "termite prevention Melbourne",
+    "bed bugs rodents Melbourne",
+    "eco-friendly pest control",
+    "pest control Geelong",
+    "pest control Bendigo",
+    "pest control Ballarat",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
@@ -60,13 +53,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: DEFAULT_TITLE,
     description: DEFAULT_DESC,
-    images: [{ url: "/logo.jpeg", width: 1408, height: 768, alt: "Turf Clean Pros — Melbourne's #1 Turf Cleaning Service" }],
+    images: [{ url: "/hero.jpeg", width: 1536, height: 1024, alt: "Hire a Pestie — Pest Control Melbourne" }],
   },
   twitter: {
     card: "summary_large_image",
     title: DEFAULT_TITLE,
     description: DEFAULT_DESC,
-    images: ["/logo.jpeg"],
+    images: ["/hero.jpeg"],
   },
   alternates: { canonical: SITE_URL },
 };
@@ -128,12 +121,12 @@ export default function RootLayout({
                   logo: `${SITE_URL}/logo.png`,
                   image: `${SITE_URL}/og-image.jpg`,
                   description:
-                    "Melbourne's largest synthetic turf cleaning service. Professional residential and commercial turf cleaning across all Melbourne suburbs.",
-                  telephone: "+61433240617",
-                  email: "admin@turfcleanpros.com.au",
+                    "Eco-friendly, licensed and fully insured pest inspection and control for residential and commercial properties across Melbourne, Geelong, Bendigo and Ballarat.",
+                  telephone: "+61448163783",
+                  email: "info@hireapestie.com.au",
                   address: {
                     "@type": "PostalAddress",
-                    addressLocality: "Bonnie Brook",
+                    addressLocality: "Melbourne",
                     addressRegion: "VIC",
                     addressCountry: "AU",
                   },
@@ -150,17 +143,11 @@ export default function RootLayout({
                       closes: "16:00",
                     },
                   ],
-                  aggregateRating: {
-                    "@type": "AggregateRating",
-                    ratingValue: "4.9",
-                    reviewCount: "93774",
-                    bestRating: "5",
-                  },
                   priceRange: "$$",
                   areaServed: { "@type": "City", name: "Melbourne" },
                   sameAs: [
                     "https://www.facebook.com/profile.php?id=61594866687026",
-                    "https://www.instagram.com/turfcleanpros.com.au?stkn=MXVlYWJva2JldDFnaA==",
+                    "https://www.instagram.com/hireapestie",
                   ],
                 },
                 {
@@ -171,7 +158,7 @@ export default function RootLayout({
                   logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
                   contactPoint: {
                     "@type": "ContactPoint",
-                    telephone: "+61433240617",
+                    telephone: "+61448163783",
                     contactType: "customer service",
                     areaServed: "AU",
                     availableLanguage: "English",

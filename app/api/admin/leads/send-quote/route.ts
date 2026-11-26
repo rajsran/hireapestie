@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const lead = await getLead(leadId);
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     const updatedLead = { ...lead, ...updates };
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://turfcleanpros.com.au";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hireapestie.com.au";
     const shortId = lead.shortId || Math.random().toString(36).slice(2, 8);
 
     let pdfBuffer: Buffer;
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
               const t = bookingTime ? ` at ${bookingTime}` : "";
               bookingText = ` Your booking is confirmed for ${d}${t}.`;
             }
-            const smsBody = `Hi ${firstName}, your Turf Clean Pros quote is $${finalAmount}.${bookingText}${linkText} Reply Y to accept or N to decline. Questions? Call us anytime!`;
+            const smsBody = `Hi ${firstName}, your Hire a Pestie quote is $${finalAmount}.${bookingText}${linkText} Reply Y to accept or N to decline. Questions? Call us anytime!`;
             await sendSms(normalisePhone(lead.phone!), smsBody);
           })().catch(err => console.error("[send-quote] SMS failed:", err))
         : null,

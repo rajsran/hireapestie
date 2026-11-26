@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
     const token = req.cookies.get('admin_token')?.value;
     const expected = await getExpectedToken();
-    if (token !== expected) {
+    if (!process.env.ADMIN_PASSWORD || token !== expected) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
   }

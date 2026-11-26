@@ -356,7 +356,7 @@ function LeadCard({ lead, onDelete, onQuoteSent }: {
 
                 {/* Editable job fields */}
                 {isTurf(lead.service) && (
-                  <Select label="Turf Size" value={turfSize} options={TURF_SIZE_OPTIONS} onChange={setTurfSize} />
+                  <Select label="Area" value={turfSize} options={TURF_SIZE_OPTIONS} onChange={setTurfSize} />
                 )}
                 {isMesh(lead.service) && (
                   <Select label="Type" value={serviceDetail} options={ADDON_TYPE_OPTIONS} onChange={setServiceDetail} />

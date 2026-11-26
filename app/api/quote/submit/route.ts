@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     const leadId = `lead-${Date.now()}`;
     const shortId = Math.random().toString(36).slice(2, 8);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://turfcleanpros.com.au";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hireapestie.com.au";
 
     const timestamp = new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne" });
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
           const linkText = quoteLink ? ` View your quote: ${quoteLink}` : "";
           await sendSms(
             normalisePhone(lead.phone),
-            `Hi ${firstName}, thanks for requesting a quote with Turf Clean Pros!${estimateText}${linkText} We'll confirm your final quote shortly. Questions? Call us anytime!`,
+            `Hi ${firstName}, thanks for requesting a quote with Hire a Pestie!${estimateText}${linkText} We'll confirm your final quote shortly. Questions? Call us anytime!`,
           );
           console.log("✅ Quote SMS sent");
         } catch (err) {

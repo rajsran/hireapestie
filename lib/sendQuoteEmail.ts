@@ -16,7 +16,7 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
         <p style="color:#4b7c5a;font-size:12px;margin:0;">We'll visit, discuss your vision, and provide a fixed quote — no obligation.</p>
       </div>`
     : lead.estimatedTotal != null
-      ? `<div style="background:#125230;border-radius:10px;padding:20px;text-align:center;margin:20px 0;">
+      ? `<div style="background:#152B57;border-radius:10px;padding:20px;text-align:center;margin:20px 0;">
           <p style="color:#9ca3af;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;">Estimated Total</p>
           <p style="color:#ffffff;font-size:32px;font-weight:bold;margin:0 0 4px;">$${lead.estimatedTotal.toLocaleString()}</p>
           <p style="color:#6b7280;font-size:12px;margin:0;">Based on details provided · Final confirmed on-site</p>
@@ -52,8 +52,8 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
   return `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e;">
     <div style="background:#1b2d6e;padding:28px 32px;border-radius:10px 10px 0 0;">
-      <img src="https://turfcleanpros.vercel.app/logo.png" alt="Turf Clean Pros" style="height:48px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />
-      <p style="color:#a0b8d8;margin:0;font-size:13px;">Melbourne&apos;s Largest Turf Cleaning Service</p>
+      <img src="https://hireapestie.com.au/logo.png" alt="Hire a Pestie" style="height:48px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />
+      <p style="color:#a0b8d8;margin:0;font-size:13px;">Your Pest Inspection &amp; Control Partner</p>
     </div>
 
     <div style="background:#ffffff;padding:32px;border:1px solid #e5e7eb;border-top:none;">
@@ -61,7 +61,7 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
       <p style="color:#374151;line-height:1.6;margin:0 0 20px;">
         ${isLandscaping
           ? "Thanks for your landscaping enquiry! We've received your details and will be in touch shortly to arrange a free on-site consultation."
-          : "Thanks for getting in touch with Turf Clean Pros! Here's your quote summary based on the details you provided. We've also attached a <strong>PDF copy</strong> to this email for your records."
+          : "Thanks for getting in touch with Hire a Pestie! Here's your quote summary based on the details you provided. We've also attached a <strong>PDF copy</strong> to this email for your records."
         }
       </p>
 
@@ -78,7 +78,7 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
       ${leadId ? `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:10px;">
         <tr>
-          <td align="center" bgcolor="#1b5e20" style="border-radius:8px;padding:0;">
+          <td align="center" bgcolor="#5A8F1C" style="border-radius:8px;padding:0;">
             <a href="${BASE_URL}/quote/accept?lead=${leadId}" style="display:block;padding:16px 24px;color:#ffffff;font-weight:bold;font-size:16px;text-decoration:none;font-family:Arial,sans-serif;text-align:center;">&#10003; Accept Quote</a>
           </td>
         </tr>
@@ -107,14 +107,14 @@ function buildCustomerHtml(lead: QuoteLead, estimate: { low: number; high: numbe
       ${leadId ? "" : `
       <div style="text-align:center;margin:24px 0;">
         <a href="tel:0433240617" style="display:inline-block;background:#1b2d6e;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:bold;font-size:14px;width:220px;">
-          Call 0433 240 617
+          Call 0448 163 783
         </a>
       </div>`}
     </div>
 
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
-      <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · Tarneit VIC 3029 · All Melbourne Suburbs</p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617 · 0433 240 617</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;">Hire a Pestie · Melbourne · Geelong · Bendigo · Ballarat</p>
+      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">info@hireapestie.com.au · 0448 163 783</p>
     </div>
   </div>`;
 }
@@ -185,7 +185,7 @@ function buildBusinessHtml(lead: QuoteLead, estimate: { low: number; high: numbe
   </div>`;
 }
 
-const BASE_URL = "https://turfcleanpros.vercel.app";
+const BASE_URL = "https://hireapestie.com.au";
 
 export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, finalAmount: number, leadId?: string): Promise<void> {
   const client = getClient();
@@ -199,7 +199,7 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
     <p style="color:#374151;font-size:14px;margin:20px 0 14px;">Ready to go ahead? Use the buttons below:</p>
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:10px;">
       <tr>
-        <td align="center" bgcolor="#1b5e20" style="border-radius:8px;padding:0;">
+        <td align="center" bgcolor="#5A8F1C" style="border-radius:8px;padding:0;">
           <a href="${acceptUrl}" style="display:block;padding:16px 24px;color:#ffffff;font-weight:bold;font-size:16px;text-decoration:none;font-family:Arial,sans-serif;text-align:center;">&#10003; Accept Quote</a>
         </td>
       </tr>
@@ -215,7 +215,7 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
       <tr>
         <td align="center" bgcolor="#1b2d6e" style="border-radius:8px;padding:0;">
-          <a href="tel:0433240617" style="display:block;padding:16px 24px;color:#ffffff;font-weight:bold;font-size:16px;text-decoration:none;font-family:Arial,sans-serif;text-align:center;">Call 0433 240 617</a>
+          <a href="tel:0433240617" style="display:block;padding:16px 24px;color:#ffffff;font-weight:bold;font-size:16px;text-decoration:none;font-family:Arial,sans-serif;text-align:center;">Call 0448 163 783</a>
         </td>
       </tr>
     </table>`;
@@ -223,8 +223,8 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
   const html = `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e;">
     <div style="background:#1b2d6e;padding:28px 32px;border-radius:10px 10px 0 0;">
-      <img src="${BASE_URL}/logo.png" alt="Turf Clean Pros" style="height:48px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />
-      <p style="color:#a0b8d8;margin:0;font-size:13px;">Melbourne's Largest Turf Cleaning Service</p>
+      <img src="${BASE_URL}/logo.png" alt="Hire a Pestie" style="height:48px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />
+      <p style="color:#a0b8d8;margin:0;font-size:13px;">Your Pest Inspection & Control Partner</p>
     </div>
     <div style="background:#ffffff;padding:32px;border:1px solid #e5e7eb;border-top:none;">
       <p style="font-size:16px;margin:0 0 16px;">Hi ${firstName},</p>
@@ -232,15 +232,15 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
         Great news! We've reviewed your job details and prepared your <strong>final confirmed quote</strong>. Please find your PDF attached.
       </p>
       ${actionButtons}
-      <div style="background:#1b5e20;border-radius:10px;padding:24px;text-align:center;margin:20px 0;">
+      <div style="background:#5A8F1C;border-radius:10px;padding:24px;text-align:center;margin:20px 0;">
         <p style="color:#a5d6a7;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;">Final Quote</p>
         <p style="color:#ffffff;font-size:36px;font-weight:bold;margin:0 0 6px;">$${finalAmount.toLocaleString()}</p>
         <p style="color:#a5d6a7;font-size:12px;margin:0;">Fixed price · No hidden costs</p>
       </div>
     </div>
     <div style="background:#f9fafb;padding:20px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
-      <p style="color:#9ca3af;font-size:11px;margin:0;">Turf Clean Pros · Tarneit VIC 3029 · All Melbourne Suburbs</p>
-      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">admin@turfcleanpros.com.au · 0433 240 617 · 0433 240 617</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;">Hire a Pestie · Melbourne · Geelong · Bendigo · Ballarat</p>
+      <p style="color:#9ca3af;font-size:11px;margin:4px 0 0;">info@hireapestie.com.au · 0448 163 783</p>
     </div>
   </div>`;
 
@@ -249,10 +249,10 @@ export async function sendFinalQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, fi
   await client.sendEmail({
     From: FROM_EMAIL,
     To: lead.email,
-    Subject: `Your Final Quote from Turf Clean Pros — $${finalAmount.toLocaleString()}`,
+    Subject: `Your Final Quote from Hire a Pestie — $${finalAmount.toLocaleString()}`,
     HtmlBody: html,
     Attachments: [{
-      Name: `TurfCleanPros-FinalQuote-${lead.name?.replace(/\s+/g, "-") ?? "Customer"}.pdf`,
+      Name: `HireAPestie-FinalQuote-${lead.name?.replace(/\s+/g, "-") ?? "Customer"}.pdf`,
       Content: pdfBuffer.toString("base64"),
       ContentType: "application/pdf",
       ContentID: "",
@@ -269,7 +269,7 @@ export async function sendAcceptedNotificationEmail(lead: QuoteLead & { finalQuo
 
   const html = `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e;">
-    <div style="background:#1b5e20;padding:20px 28px;border-radius:10px 10px 0 0;">
+    <div style="background:#5A8F1C;padding:20px 28px;border-radius:10px 10px 0 0;">
       <h2 style="color:#ffffff;margin:0;font-size:18px;">✓ Quote Accepted!</h2>
       <p style="color:#a5d6a7;margin:4px 0 0;font-size:12px;">${timestamp}</p>
     </div>
@@ -406,7 +406,7 @@ export async function sendQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, leadId?
   const BUSINESS_EMAIL = process.env.ADMIN_EMAIL ?? process.env.POSTMARK_FROM_EMAIL!;
   const estimate = isTurfService(lead.service) ? calcTurfEstimate(lead) : calcEstimate(lead);
   const pdfAttachment = {
-    Name: `TurfCleanPros-Quote-${lead.name?.replace(/\s+/g, "-") ?? "Customer"}.pdf`,
+    Name: `HireAPestie-Quote-${lead.name?.replace(/\s+/g, "-") ?? "Customer"}.pdf`,
     Content: pdfBuffer.toString("base64"),
     ContentType: "application/pdf",
     ContentID: "",
@@ -418,7 +418,7 @@ export async function sendQuoteEmail(lead: QuoteLead, pdfBuffer: Buffer, leadId?
     emails.push({
       From: FROM_EMAIL,
       To: lead.email,
-      Subject: `Your Turf Clean Pros Quote — ${lead.service}`,
+      Subject: `Your Hire a Pestie Quote — ${lead.service}`,
       HtmlBody: buildCustomerHtml(lead, estimate, leadId),
       Attachments: [pdfAttachment],
       MessageStream: "outbound",

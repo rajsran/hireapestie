@@ -1,25 +1,28 @@
 import type { Metadata } from "next";
 import ServicesClient from "./ServicesClient";
 
+const TITLE = "Pest Control Services Melbourne | Residential, Commercial, Inspections & Pre-construction";
+const DESC =
+  "Hire a Pestie offers pre-construction pest control, pest inspections, residential and commercial pest control across Melbourne, Geelong, Bendigo and Ballarat. Eco-friendly, licensed and fully insured. Get a free quote.";
+
 export const metadata: Metadata = {
-  title: "Synthetic Turf Cleaning Services Melbourne | Deep Clean, Pet Treatment & More",
-  description:
-    "Professional synthetic turf cleaning services across all Melbourne suburbs. Deep clean from $150, pet odour treatment, moss removal, debris clearing & maintenance plans. Fully insured, 4.9★ rated.",
+  title: TITLE,
+  description: DESC,
   keywords: [
-    "synthetic turf cleaning Melbourne",
-    "turf deep clean Melbourne",
-    "pet odour turf treatment Melbourne",
-    "moss algae removal synthetic turf",
-    "turf maintenance plan Melbourne",
-    "artificial grass cleaning Melbourne",
+    "pest control Melbourne",
+    "pre-construction pest control Melbourne",
+    "pest inspection Melbourne",
+    "residential pest control Melbourne",
+    "commercial pest control Melbourne",
+    "termite prevention Melbourne",
+    "bed bug and rodent control",
   ],
   openGraph: {
-    title: "Synthetic Turf Cleaning Services Melbourne | Deep Clean, Pet Treatment & More",
-    description:
-      "Professional synthetic turf cleaning services across all Melbourne suburbs. Deep clean from $150, pet odour treatment, moss removal, debris clearing & maintenance plans.",
-    url: "https://www.turfcleanpros.com.au/services",
+    title: TITLE,
+    description: DESC,
+    url: "https://hireapestie.com.au/services",
   },
-  alternates: { canonical: "https://www.turfcleanpros.com.au/services" },
+  alternates: { canonical: "https://hireapestie.com.au/services" },
 };
 
 export default function ServicesPage() {

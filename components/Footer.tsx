@@ -1,101 +1,112 @@
 import Link from "next/link";
-import { Phone, MapPin, Mail, Droplets, Facebook, Linkedin, Instagram } from "lucide-react";
+import Image from "next/image";
+import { Phone, MapPin, Mail, Facebook, Instagram, Youtube } from "lucide-react";
 
 const quickLinks = [
-  { href: "/",         label: "Home"       },
-  { href: "/services", label: "Services"   },
-  { href: "/projects", label: "Projects"   },
-  { href: "/about",    label: "About Us"   },
-  { href: "/contact",  label: "Contact"    },
+  { href: "/",         label: "Home"     },
+  { href: "/about",    label: "About Us" },
+  { href: "/services", label: "Services" },
+  { href: "/blog",     label: "Blog"     },
+  { href: "/faq",      label: "FAQ"      },
+  { href: "/contact",  label: "Contact Us" },
 ];
 
-const contactItems = [
-  { Icon: MapPin, content: "Bonnie Brook VIC 3335 · All Melbourne Suburbs", href: "https://maps.google.com/?q=Bonnie+Brook+VIC+3335" },
-  { Icon: Phone,  content: "0433 240 617",                                   href: "tel:0433240617"  },
-  { Icon: Mail,   content: "admin@turfcleanpros.com.au",                     href: "mailto:admin@turfcleanpros.com.au" },
+const whatWeDo = [
+  { href: "/services#pre-construction-pest-control", label: "Pre-construction Pest Control" },
+  { href: "/services#pest-control-inspection",       label: "Pest Inspection"               },
+  { href: "/services#residential-pest-control",      label: "Residential Pest Control"      },
+  { href: "/services#commercial-pest-control",       label: "Commercial Pest Control"       },
+  { href: "/services#pests",                         label: "Pests"                         },
 ];
+
+// Add the real profile links here — an icon only appears once its URL is filled in.
+const socials = [
+  { label: "Facebook",  Icon: Facebook,  href: "" },
+  { label: "Instagram", Icon: Instagram, href: "" },
+  { label: "YouTube",   Icon: Youtube,   href: "" },
+].filter((s) => s.href);
+
+const contactItems = [
+  { Icon: MapPin, content: "Melbourne, Geelong, Bendigo, Ballarat", href: "https://maps.google.com/?q=Melbourne+VIC" },
+  { Icon: Mail,   content: "info@hireapestie.com.au",                href: "mailto:info@hireapestie.com.au" },
+  { Icon: Phone,  content: "0448 163 783",                           href: "tel:0448163783" },
+];
+
+const headingCls = "font-display font-bold text-xl text-accent-500 mb-5";
+const linkCls = "text-ink-700 text-sm hover:text-violet-700 hover:underline underline-offset-4 transition-colors";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0f0f0f] text-white">
-      <div className="max-w-7xl mx-auto px-5 pt-10 pb-6">
+    <footer className="bg-white border-t-4 border-violet-400 text-ink-900">
+      <div className="max-w-7xl mx-auto px-5">
+        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.1fr_1fr_1.3fr_1.3fr] lg:gap-0">
 
-        {/* Brand */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center">
-            <Droplets className="w-5 h-5 text-white" />
+          {/* Brand */}
+          <div className="lg:pr-8 flex flex-col items-start gap-4">
+            <Link href="/" aria-label="Hire a Pestie — home">
+              <Image src="/logo.png" alt="Hire a Pestie" width={240} height={94} className="h-20 w-auto object-contain" />
+            </Link>
+            <p className="text-ink-500 text-sm leading-relaxed max-w-[16rem]">
+              Your pest inspection &amp; control partner. Eco-friendly, licensed and fully insured.
+            </p>
           </div>
-          <div className="leading-tight">
-            <span className="block text-white font-black text-sm tracking-widest uppercase">Turf Clean Pros</span>
-            <span className="block text-violet-400 text-[10px] tracking-widest uppercase">Melbourne&apos;s Largest Turf Cleaner</span>
-          </div>
-        </div>
-
-        {/* Two-col grid */}
-        <div className="grid grid-cols-2 gap-8 mb-8">
 
           {/* Quick Links */}
-          <div>
-            <p className="text-violet-400 text-[10px] font-bold tracking-widest uppercase mb-3">Quick Links</p>
+          <div className="lg:border-l lg:border-gray-200 lg:px-8">
+            <h3 className={headingCls}>Quick Links</h3>
             <ul className="flex flex-col gap-2.5">
               {quickLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="text-white/60 text-sm hover:text-white transition-colors"
-                  >
-                    {label}
-                  </Link>
-                </li>
+                <li key={label}><Link href={href} className={linkCls}>{label}</Link></li>
               ))}
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <p className="text-violet-400 text-[10px] font-bold tracking-widest uppercase mb-3">Contact</p>
+          {/* What We Do */}
+          <div className="lg:border-l lg:border-gray-200 lg:px-8">
+            <h3 className={headingCls}>What We Do</h3>
             <ul className="flex flex-col gap-2.5">
+              {whatWeDo.map(({ href, label }) => (
+                <li key={label}><Link href={href} className={linkCls}>{label}</Link></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Get in Touch */}
+          <div className="lg:border-l lg:border-gray-200 lg:pl-8">
+            <h3 className={headingCls}>Get in Touch</h3>
+            <ul className="flex flex-col gap-3">
               {contactItems.map(({ Icon, content, href }) => (
-                <li key={content} className="flex items-start gap-2">
-                  <Icon className="w-3.5 h-3.5 text-violet-400 shrink-0 mt-0.5" />
-                  {href ? (
-                    <a href={href} className="text-white/60 text-sm hover:text-white transition-colors leading-tight">{content}</a>
-                  ) : (
-                    <span className="text-white/60 text-sm leading-tight">{content}</span>
-                  )}
+                <li key={content} className="flex items-start gap-3">
+                  <Icon className="w-4 h-4 text-accent-500 shrink-0 mt-0.5" />
+                  <a href={href} className={linkCls}>{content}</a>
                 </li>
               ))}
             </ul>
 
-            {/* Social icons */}
-            <div className="flex items-center gap-4 mt-5">
-              <a href="https://www.facebook.com/profile.php?id=61594866687026" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-white/40 hover:text-white transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" aria-label="LinkedIn" className="text-white/40 hover:text-white transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="https://www.instagram.com/turfcleanpros.com.au?stkn=MXVlYWJva2JldDFnaA==" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-white/40 hover:text-white transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
+            {socials.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mt-5">
+                {socials.map(({ label, Icon, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="w-8 h-8 rounded-md bg-accent-500 text-white flex items-center justify-center hover:bg-accent-600 transition-colors"
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* CTA */}
-        <a
-          href="tel:0433240617"
-          className="flex items-center justify-center gap-2 w-full py-3.5 bg-violet-600 hover:bg-violet-700 active:scale-[0.98] text-white font-bold rounded-2xl text-sm transition-all mb-6"
-        >
-          <Phone className="w-4 h-4" />
-          Call 0433 240 617
-        </a>
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/5 px-5 py-4">
-        <p className="text-white/20 text-xs text-center">
-          © {new Date().getFullYear()} Turf Clean Pros. All rights reserved.
+      <div className="bg-navy-800 px-5 py-4">
+        <p className="text-white/70 text-xs text-center">
+          © {new Date().getFullYear()} Hire a Pestie. All Rights Reserved.
         </p>
       </div>
     </footer>

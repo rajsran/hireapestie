@@ -120,11 +120,11 @@ function InvoicePdfDocument({ invoice }: { invoice: InvoiceData }) {
     : null;
 
   const lineItems = [
-    { description: invoice.service ?? "Turf Cleaning Services", amount: invoice.amount },
+    { description: invoice.service ?? "Pest Control Services", amount: invoice.amount },
   ];
 
   const jobDetails: { label: string; value: string }[] = [];
-  if (invoice.turfSize)     jobDetails.push({ label: "Turf Size",  value: invoice.turfSize });
+  if (invoice.turfSize)     jobDetails.push({ label: "Area",       value: invoice.turfSize });
   if (invoice.serviceDetail) jobDetails.push({ label: "Treatment", value: invoice.serviceDetail });
 
   return (
@@ -177,7 +177,7 @@ function InvoicePdfDocument({ invoice }: { invoice: InvoiceData }) {
             React.createElement(Text, { style: styles.sectionTitle }, "From"),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Company"),
-              React.createElement(Text, { style: styles.infoValue }, "Turf Clean Pros"),
+              React.createElement(Text, { style: styles.infoValue }, "Hire a Pestie"),
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "ABN"),
@@ -185,11 +185,11 @@ function InvoicePdfDocument({ invoice }: { invoice: InvoiceData }) {
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Phone"),
-              React.createElement(Text, { style: styles.infoValue }, "0433 240 617"),
+              React.createElement(Text, { style: styles.infoValue }, "0448 163 783"),
             ),
             React.createElement(View, { style: styles.infoRow },
               React.createElement(Text, { style: styles.infoLabel }, "Email"),
-              React.createElement(Text, { style: styles.infoValue }, "admin@turfcleanpros.com.au"),
+              React.createElement(Text, { style: styles.infoValue }, "info@hireapestie.com.au"),
             ),
           ),
         ),
@@ -272,10 +272,10 @@ function InvoicePdfDocument({ invoice }: { invoice: InvoiceData }) {
         // Footer
         React.createElement(View, { style: styles.footer },
           React.createElement(Text, { style: styles.footerLeft },
-            `Turf Clean Pros · ABN ${COMPANY_ABN}\nBonnie Brook VIC 3335 · All Melbourne Suburbs`
+            `Hire a Pestie · ABN ${COMPANY_ABN}\nMelbourne · Geelong · Bendigo · Ballarat`
           ),
           React.createElement(Text, { style: styles.footerRight },
-            "0433 240 617\nadmin@turfcleanpros.com.au"
+            "0448 163 783\ninfo@hireapestie.com.au"
           ),
         ),
       )
